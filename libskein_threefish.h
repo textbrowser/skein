@@ -25,36 +25,19 @@
 ** SKEIN, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <limits.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
+#ifndef LIBSKEIN_THREEFISH_H
+#define LIBSKEIN_THREEFISH_H
 
-#include "libskein_ubi.h"
-
-char *libskein_ubi1024(const char *G,
-		       const size_t G_size,
-		       const char *M,
-		       const size_t M_size,
-		       const uint64_t *T)
+#ifdef __cplusplus
+extern "C"
 {
-  char *ubi = 0;
+#endif
 
-  if(!G || G_size <= 0 ||
-     !M || M_size <= 0 ||
-     !T)
-    return ubi;
+char *libskein_threefish1024(const char *K,
+			     const uint64_t *T,
+			     const char *P);
 
-  char *M_1 = (char *) malloc(M_size);
-
-  if(!M_1)
-    goto done_label;
-  else
-    memcpy(M_1, M, M_size);
-
- done_label:
-  memset(M_1, 0, M_size);
-  free(M_1);
-  M_1 = 0;
-  return ubi;
+#ifdef __cplusplus
 }
+#endif
+#endif

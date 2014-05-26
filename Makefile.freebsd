@@ -1,11 +1,12 @@
 OBJECT_FILES = libskein_ubi.o
 
 all:	$(OBJECT_FILES)
-	gcc $(LDFLAGS) -shared -Wl,-soname,libskein.so -o libskein.so "$?"
+	gcc $(LDFLAGS) -shared -Wl,-soname,libskein.so -o libskein.so $?
 
 libskein_ubi.o:	libskein_ubi.c libskein_ubi.h
-	gcc $(CFLAGS) -fPIC -fstack-protector-all -Wall -Werror -Wextra \
-	-Wstack-protector -c -o libskein_ubi.o libskein_ubi.c
+	gcc $(CFLAGS) -fPIC -fstack-protector-all -Wall -Wconversion \
+	-Werror -Wextra -Wstack-protector \
+	-c -o libskein_ubi.o libskein_ubi.c
 
 clean:
 	rm -f *.o libskein.so
@@ -15,7 +16,7 @@ install: all
 	install -o root -g root libskein.so /usr/local/lib
 
 library: $(OBJECT_FILES)
-	gcc $(LDFLAGS) -shared -Wl,-soname,libskein.so -o libskein.so "$?"
+	gcc $(LDFLAGS) -shared -Wl,-soname,libskein.so -o libskein.so $?
 
 purge:
 	rm -f *~*

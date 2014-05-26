@@ -33,6 +33,12 @@ extern "C"
 {
 #endif
 
+char *libskein_ubi1024(const char *G,
+		       const size_t G_size,
+		       const char *M,
+		       const size_t M_size,
+		       const uint64_t *T);
+
 #ifdef __cplusplus
 }
 #endif

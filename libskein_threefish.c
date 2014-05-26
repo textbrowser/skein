@@ -30,31 +30,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "libskein_ubi.h"
+#include "libskein_threefish.h"
 
-char *libskein_ubi1024(const char *G,
-		       const size_t G_size,
-		       const char *M,
-		       const size_t M_size,
-		       const uint64_t *T)
+char *libskein_threefish1024(const char *K,
+			     const uint64_t *T,
+			     const char *P)
 {
-  char *ubi = 0;
+  char *E = 0;
 
-  if(!G || G_size <= 0 ||
-     !M || M_size <= 0 ||
-     !T)
-    return ubi;
+  if(!K || !P || !T)
+    return E;
 
-  char *M_1 = (char *) malloc(M_size);
-
-  if(!M_1)
-    goto done_label;
-  else
-    memcpy(M_1, M, M_size);
-
- done_label:
-  memset(M_1, 0, M_size);
-  free(M_1);
-  M_1 = 0;
-  return ubi;
+  return E;
 }

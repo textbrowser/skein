@@ -4,7 +4,7 @@ all:	$(OBJECT_FILES)
 	gcc $(LDFLAGS) -shared -o libskein.dll $(OBJECT_FILES)
 
 libskein_ubi.o:	libskein_ubi.c libskein_ubi.h
-	gcc $(CFLAGS) -Wall -Werror -Wextra -c -o \
+	gcc $(CFLAGS) -Wall -Wconversion -Werror -Wextra -c -o \
 	libskein_ubi.o libskein_ubi.c
 
 clean:
