@@ -1,4 +1,4 @@
-CFLAGS = -fPIC -fstack-protector-all -Wall \
+CFLAGS = -fPIC -fstack-protector-all -std=c99 -Wall \
 	 -Wconversion -Werror -Wextra -Wstack-protector \
 
 OBJECT_FILES = libskein_threefish.o \

@@ -32,14 +32,40 @@
 
 #include "libskein_threefish.h"
 
-char *libskein_threefish1024(const char *K,
-			     const uint64_t *T,
-			     const char *P)
+static uint64_t to_int(const char *bytes,
+		       const size_t length)
 {
-  char *E = 0;
+  if(!bytes || length <= 0)
+    return (uint64_t) 0;
 
-  if(!K || !P || !T)
-    return E;
+  return (*(uint64_t*)(bytes + length));
+}
 
-  return E;
+void libskein_threefish1024(char *E,
+			    const char *K,
+			    const char *T,
+			    const char *P)
+{
+  if(!E || !K || !P || !T)
+    return;
+
+  size_t Nr = 80;
+  size_t Nw = 16;
+  uint64_t k[Nw];
+  uint64_t p[Nw];
+  uint64_t t[2];
+
+  for(size_t i = 0; i < Nw; i++)
+    k[i] = to_int(&K[i * 8], 8);
+
+  t[0] = to_int(&T[0], 8);
+  t[1] = to_int(&T[8], 8);
+
+  for(size_t i = 0; i < Nw; i++)
+    p[i] = to_int(&P[i * 8], 8);
+
+  (void) Nr;
+  memset(k, 0, sizeof(k));
+  memset(p, 0, sizeof(p));
+  memset(t, 0, sizeof(t));
 }

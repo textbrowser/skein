@@ -33,9 +33,10 @@ extern "C"
 {
 #endif
 
-char *libskein_threefish1024(const char *K,
-			     const uint64_t *T,
-			     const char *P);
+void libskein_threefish1024(char *E,
+			    const char *K,
+			    const char *T,
+			    const char *P);
 
 #ifdef __cplusplus
 }
