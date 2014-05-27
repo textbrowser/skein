@@ -100,7 +100,7 @@ static void mix(const uint64_t x0,
   ** Please see https://en.wikipedia.org/wiki/Circular_shift.
   */
 
-  *y1 = (x1 << R[d % 8][j]) | (x1 >> (sizeof(uint64_t) - R[d % 8][j]));
+  *y1 = (x1 << R[d % 8][j]) | (x1 >> (64 - R[d % 8][j]));
 }
 
 static void threefish1024_E(char *E,
