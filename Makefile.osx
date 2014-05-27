@@ -4,7 +4,8 @@ OBJECT_FILES = libskein_threefish.o \
 	       libskein_ubi.o
 
 all:	$(OBJECT_FILES)
-	gcc $(LDFLAGS) -dynamiclib -o libskein.dylib $?
+	gcc $(CFLAGS) -dynamiclib -o libskein.dylib $?
+	gcc $(CFLAGS) test.c -o test -L. -lskein
 
 libskein_threefish.o: libskein_threefish.c libskein_threefish.h
 	gcc $(CFLAGS) -c -o libskein_threefish.o libskein_threefish.c
@@ -14,6 +15,7 @@ libskein_ubi.o:	libskein_ubi.c libskein_ubi.h
 
 clean:
 	rm -f *.o libskein.dylib
+	rm -f test
 
 install: all
 	install -o root -g wheel -d /usr/local/lib

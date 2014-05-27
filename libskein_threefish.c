@@ -26,7 +26,6 @@
 */
 
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -45,20 +44,17 @@ static uint64_t R[8][8] = {{24, 13, 8, 47, 8, 17, 22, 37},
 			   {31, 44, 47, 46, 19, 42, 44, 25},
 			   {9, 48, 35, 52, 23, 31, 37, 20}};
 static void bytesToWords(uint64_t *W,
-			 const size_t W_size,
 			 const char *bytes,
 			 const size_t bytes_size);
 static void wordsToBytes(char *B,
-			 const size_t B_size,
 			 const uint64_t *words,
 			 const size_t words_size);
 
 static void bytesToWords(uint64_t *W,
-			 const size_t W_size,
 			 const char *bytes,
 			 const size_t bytes_size)
 {
-  if(!W || W_size <= 0 || !bytes || bytes_size <= 0)
+  if(!W || !bytes || bytes_size <= 0)
     return;
 
   uint64_t w = 0;
@@ -87,11 +83,11 @@ static void mix(const uint64_t x0,
   ** Section 3.3.1.
   */
 
-  if(!y0 || !y1)
-    return;
-  else if(d <= 0 || (d % 8) > 7)
+  if(d <= 0 || (d % 8) > 7)
     return;
   else if(j <= 0 || j > 7)
+    return;
+  else if(!y0 || !y1)
     return;
 
   *y0 = x0 + x1;
@@ -124,9 +120,9 @@ static void threefish1024_E(char *E,
   uint64_t t[3];
   uint64_t v[Nw];
 
-  bytesToWords(k, Nw, K, 128);
-  bytesToWords(p, Nw, P, 128);
-  bytesToWords(t, 2, T, 16);
+  bytesToWords(k, K, (size_t) 128);
+  bytesToWords(p, P, (size_t) 128);
+  bytesToWords(t, T, (size_t) 2);
 
   for(size_t i = 0; i < Nw; i++)
     kNw ^= k[i]; // Section 3.3.2.
@@ -187,7 +183,7 @@ static void threefish1024_E(char *E,
   for(size_t i = 0; i < Nw; i++)
     c[i] = v[i] + s[Nr / 4][i];
 
-  wordsToBytes(E, 128, c, Nw);
+  wordsToBytes(E, c, Nw);
   memset(c, 0, sizeof(c));
   memset(k, 0, sizeof(k));
   memset(p, 0, sizeof(p));
@@ -197,11 +193,10 @@ static void threefish1024_E(char *E,
 }
 
 static void wordsToBytes(char *B,
-			 const size_t B_size,
 			 const uint64_t *words,
 			 const size_t words_size)
 {
-  if(!B || B_size <= 0 || !words || words_size <= 0)
+  if(!B || !words || words_size <= 0)
     return;
 
   for(size_t i = 0; i < words_size; i++)
@@ -210,7 +205,7 @@ static void wordsToBytes(char *B,
 
       for(size_t j = 0; j < 8; j++)
 	{
-	  B[j + i * 8] = (char) (0xff & w);
+	  B[i * 8 + j] = (char) (0xff & w);
 	  w >>= 8;
 	}
     }
