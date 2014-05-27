@@ -56,13 +56,13 @@ void libskein_threefish1024(char *E,
   uint64_t t[2];
 
   for(size_t i = 0; i < Nw; i++)
-    k[i] = to_int(&K[i * 8], 8);
+    k[i] = to_int(&K[i * 8], (size_t) 8);
 
-  t[0] = to_int(&T[0], 8);
-  t[1] = to_int(&T[8], 8);
+  t[0] = to_int(&T[0], (size_t) 8);
+  t[1] = to_int(&T[8], (size_t) 8);
 
   for(size_t i = 0; i < Nw; i++)
-    p[i] = to_int(&P[i * 8], 8);
+    p[i] = to_int(&P[i * 8], (size_t) 8);
 
   (void) Nr;
   memset(k, 0, sizeof(k));

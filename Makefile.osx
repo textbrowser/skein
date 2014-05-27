@@ -1,12 +1,16 @@
-OBJECT_FILES = libskein_ubi.o
+CFLAGS = -fPIC -fstack-protector-all -std=c99 -Wall -Wconversion \
+	 -Werror -Wextra -Wstack-protector
+OBJECT_FILES = libskein_threefish.o \
+	       libskein_ubi.o
 
 all:	$(OBJECT_FILES)
 	gcc $(LDFLAGS) -dynamiclib -o libskein.dylib $?
 
+libskein_threefish.o: libskein_threefish.c libskein_threefish.h
+	gcc $(CFLAGS) -c -o libskein_threefish.o libskein_threefish.c
+
 libskein_ubi.o:	libskein_ubi.c libskein_ubi.h
-	gcc $(CFLAGS) -fPIC -fstack-protector-all -Wall -Wconversion \
-	-Werror -Wextra -Wstack-protector \
-	-c -o libskein_ubi.o libskein_ubi.c
+	gcc $(CFLAGS) -c -o libskein_ubi.o libskein_ubi.c
 
 clean:
 	rm -f *.o libskein.dylib
@@ -16,7 +20,7 @@ install: all
 	install -o root -g wheel libskein.dylib /usr/local/lib
 
 library: $(OBJECT_FILES)
-	gcc $(LDFLAGS) -dynamiclib -o libskein.so $?
+	gcc $(LDFLAGS) -dynamiclib -o libskein.dylib $?
 
 purge:
 	rm -f *~*
