@@ -33,10 +33,11 @@ extern "C"
 {
 #endif
 
-void libskein_threefish1024(char *E,
-			    const char *K,
-			    const char *T,
-			    const char *P);
+void libskein_threefish(char *E,
+			const char *K,
+			const char *T,
+			const char *P,
+			const size_t block_size);
 
 #ifdef __cplusplus
 }

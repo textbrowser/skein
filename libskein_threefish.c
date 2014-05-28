@@ -26,23 +26,43 @@
 */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "libskein_threefish.h"
 
-static size_t Nr = 80;
-static size_t Nw = 16;
-static uint64_t Pi[16] = {0, 9, 2, 13, 6, 11, 4, 15,
-			  10, 7, 12, 3, 14, 5, 8, 1};
-static uint64_t R[8][8] = {{24, 13, 8, 47, 8, 17, 22, 37},
-			   {38, 19, 10, 55, 49, 18, 23, 52},
-			   {33, 4, 51, 13, 34, 41, 59, 17},
-			   {5, 20, 48, 41, 47, 28, 16, 25},
-			   {41, 9, 37, 31, 12, 47, 44, 30},
-			   {16, 34, 56, 51, 4, 53, 42, 41},
-			   {31, 44, 47, 46, 19, 42, 44, 25},
-			   {9, 48, 35, 52, 23, 31, 37, 20}};
+static size_t Nr = 4;
+static size_t Nw = 72;
+static uint64_t *Pi = 0;
+static uint64_t Pi_4[4] = {0, 3, 2, 1};
+static uint64_t Pi_8[8] = {2, 1, 4, 7, 6, 5, 0, 3};
+static uint64_t Pi_16[16] = {0, 9, 2, 13, 6, 11, 4, 15,
+			     10, 7, 12, 3, 14, 5, 8, 1};
+static uint64_t R_4[8][2] = {{14, 16},
+			     {52, 57},
+			     {23, 40},
+			     {5, 37},
+			     {25, 33},
+			     {46, 12},
+			     {58, 22},
+			     {32, 32}};
+static uint64_t R_8[8][4] = {{46, 36, 19, 37},
+			     {33, 27, 14, 42},
+			     {17, 49, 36, 39},
+			     {44, 9, 54, 56},
+			     {39, 30, 34, 24},
+			     {13, 50, 10, 17},
+			     {25, 29, 39, 43},
+			     {8, 35, 56, 22}};
+static uint64_t R_16[8][8] = {{24, 13, 8, 47, 8, 17, 22, 37},
+			      {38, 19, 10, 55, 49, 18, 23, 52},
+			      {33, 4, 51, 13, 34, 41, 59, 17},
+			      {5, 20, 48, 41, 47, 28, 16, 25},
+			      {41, 9, 37, 31, 12, 47, 44, 30},
+			      {16, 34, 56, 51, 4, 53, 42, 41},
+			      {31, 44, 47, 46, 19, 42, 44, 25},
+			      {9, 48, 35, 52, 23, 31, 37, 20}};
 static void bytesToWords(uint64_t *W,
 			 const char *bytes,
 			 const size_t bytes_size);
@@ -54,22 +74,12 @@ static void bytesToWords(uint64_t *W,
 			 const char *bytes,
 			 const size_t bytes_size)
 {
-  if(!W || !bytes || bytes_size <= 0)
-    return;
-
-  uint64_t w = 0;
-
-  for(size_t i = 0, j = 0; i < bytes_size; i++)
-    {
-      w |= ((uint64_t) (bytes[i] & 0xff)) << (i * 8);
-
-      if((i - 7) % 8 == 0)
-	{
-	  W[j] = w;
-	  w = 0;
-	  j += 1;
-	}
-    } 
+  for(size_t i = 0; i < bytes_size / 8; i++)
+    for(size_t j = 0; j < 8; j++)
+      {
+	W[i] <<= 8;
+	W[i] += (uint64_t) bytes[i * 8 + j];
+      }
 }
 
 static void mix(const uint64_t x0,
@@ -77,18 +87,12 @@ static void mix(const uint64_t x0,
 		const size_t d,
 		const size_t j,
 		uint64_t *y0,
-		uint64_t *y1)
+		uint64_t *y1,
+		const uint64_t block_size)
 {
   /*
   ** Section 3.3.1.
   */
-
-  if(d <= 0 || (d % 8) > 7)
-    return;
-  else if(j <= 0 || j > 7)
-    return;
-  else if(!y0 || !y1)
-    return;
 
   *y0 = x0 + x1;
 
@@ -96,20 +100,23 @@ static void mix(const uint64_t x0,
   ** Please see https://en.wikipedia.org/wiki/Circular_shift.
   */
 
-  *y1 = ((x1 << R[d % 8][j]) | (x1 >> (64 - R[d % 8][j]))) ^ *y0;
+  if(block_size == 256)
+    *y1 = ((x1 << R_4[d % 8][j]) | (x1 >> (64 - R_4[d % 8][j]))) ^ *y0;
+  else if(block_size == 512)
+    *y1 = ((x1 << R_8[d % 8][j]) | (x1 >> (64 - R_8[d % 8][j]))) ^ *y0;
+  else
+    *y1 = ((x1 << R_16[d % 8][j]) | (x1 >> (64 - R_16[d % 8][j]))) ^ *y0;
 }
 
-static void threefish1024_E(char *E,
-			    const char *K,
-			    const char *T,
-			    const char *P)
+static void threefish_E(char *E,
+			const char *K,
+			const char *T,
+			const char *P,
+			const size_t block_size)
 {
   /*
   ** Section 3.3.
   */
-
-  if(!E || !K || !P || !T)
-    return;
 
   uint64_t C240 = 0x1bd11bdaa9fc1a22;
   uint64_t c[Nw];
@@ -120,9 +127,9 @@ static void threefish1024_E(char *E,
   uint64_t t[3];
   uint64_t v[Nw];
 
-  bytesToWords(k, K, (size_t) 128);
-  bytesToWords(p, P, (size_t) 128);
-  bytesToWords(t, T, (size_t) 2);
+  bytesToWords(k, K, (size_t) block_size / 8);
+  bytesToWords(p, P, (size_t) block_size / 8);
+  bytesToWords(t, T, (size_t) 16);
 
   for(size_t i = 0; i < Nw; i++)
     kNw ^= k[i]; // Section 3.3.2.
@@ -151,7 +158,7 @@ static void threefish1024_E(char *E,
 	  s[d][i] += t[d % 3];
       }
 
-  for(size_t d = 0; d < Nr; d++)
+  for(size_t d = 0; d < Nr; d++) // d rounds.
     {
       uint64_t e[Nw];
 
@@ -171,7 +178,7 @@ static void threefish1024_E(char *E,
 	  uint64_t y0 = 0;
 	  uint64_t y1 = 0;
 
-	  mix(x0, x1, d, j, &y0, &y1);
+	  mix(x0, x1, d, j, &y0, &y1, block_size);
 	  f[j * 2] = y0;
 	  f[j * 2 + 1] = y1;
 	}
@@ -196,25 +203,37 @@ static void wordsToBytes(char *B,
 			 const uint64_t *words,
 			 const size_t words_size)
 {
-  if(!B || !words || words_size <= 0)
-    return;
-
   for(size_t i = 0; i < words_size; i++)
-    {
-      uint64_t w = words[i];
-
-      for(size_t j = 0; j < 8; j++)
-	{
-	  B[i * 8 + j] = (char) (0xff & w);
-	  w >>= 8;
-	}
-    }
+    for(size_t j = 0; j < 8; j++)
+      B[i * 8 + j] = (char) ((words[i] >> (8 * (7 - j))) & 0xff);
 }
 
-void libskein_threefish1024(char *E,
-			    const char *K,
-			    const char *T,
-			    const char *P)
+void libskein_threefish(char *E,
+			const char *K,
+			const char *T,
+			const char *P,
+			const size_t block_size)
 {
-  threefish1024_E(E, K, T, P);
+  if(block_size == 256)
+    {
+      Nr = 72;
+      Nw = 4;
+      Pi = Pi_4;
+    }
+  else if(block_size == 512)
+    {
+      Nr = 72;
+      Nw = 8;
+      Pi = Pi_8;
+    }
+  else if(block_size == 1024)
+    {
+      Nr = 80;
+      Nw = 16;
+      Pi = Pi_16;
+    }
+  else
+    return;
+
+  threefish_E(E, K, T, P, block_size);
 }

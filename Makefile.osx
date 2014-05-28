@@ -4,7 +4,7 @@ OBJECT_FILES = libskein_threefish.o \
 	       libskein_ubi.o
 
 all:	$(OBJECT_FILES)
-	gcc $(CFLAGS) -dynamiclib -o libskein.dylib $?
+	gcc -dynamiclib -o libskein.dylib $?
 	gcc $(CFLAGS) test.c -o test -L. -lskein
 
 libskein_threefish.o: libskein_threefish.c libskein_threefish.h
@@ -22,7 +22,7 @@ install: all
 	install -o root -g wheel libskein.dylib /usr/local/lib
 
 library: $(OBJECT_FILES)
-	gcc $(LDFLAGS) -dynamiclib -o libskein.dylib $?
+	gcc -dynamiclib -o libskein.dylib $?
 
 purge:
 	rm -f *~*

@@ -1,1 +1,5 @@
+Skein is a hash function designed by Niels Ferguson, Stefan Lucks,
+Bruce Schneier, Doug Whiting, Mihir Bellare, Tadayoshi Kohno,
+Jon Callas, and Jesse Walker.
+
 Please see http://www.skein-hash.info/about for more information.
