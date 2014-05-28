@@ -81,14 +81,14 @@ static void bytesToWords(uint64_t *W,
       for(size_t j = 0; j < 8; j++)
 	b[j] = bytes[i * 8 + j];
 
-      W[i] = ((uint64_t) b[0] << 56) |
-	((uint64_t) b[1] << 48) |
-	((uint64_t) b[2] << 40) |
-	((uint64_t) b[3] << 32) |
-	((uint64_t) b[4] << 24) |
-	((uint64_t) b[5] << 16) |
-	((uint64_t) b[6] << 8) |
-	((uint64_t) b[7] << 0);
+      W[i] = ((uint64_t) b[0]) |
+	((uint64_t) b[1] << 8) |
+	((uint64_t) b[2] << 16) |
+	((uint64_t) b[3] << 24) |
+	((uint64_t) b[4] << 32) |
+	((uint64_t) b[5] << 40) |
+	((uint64_t) b[6] << 48) |
+	((uint64_t) b[7] << 56);
     }
 }
 
@@ -217,14 +217,14 @@ static void wordsToBytes(char *B,
 {
   for(size_t i = 0; i < words_size; i++)
     {
-      B[i * 8 + 0] = (char) ((words[i] >> 56) & 0xff);
-      B[i * 8 + 1] = (char) ((words[i] >> 48) & 0xff);
-      B[i * 8 + 2] = (char) ((words[i] >> 40) & 0xff);
-      B[i * 8 + 3] = (char) ((words[i] >> 32) & 0xff);
-      B[i * 8 + 4] = (char) ((words[i] >> 24) & 0xff);
-      B[i * 8 + 5] = (char) ((words[i] >> 16) & 0xff);
-      B[i * 8 + 6] = (char) ((words[i] >> 8) & 0xff);
-      B[i * 8 + 7] = (char) ((words[i] >> 0) & 0xff);
+      B[i * 8 + 0] = (char) (words[i]);
+      B[i * 8 + 1] = (char) (words[i] >> 8);
+      B[i * 8 + 2] = (char) (words[i] >> 16);
+      B[i * 8 + 3] = (char) (words[i] >> 24);
+      B[i * 8 + 4] = (char) (words[i] >> 32);
+      B[i * 8 + 5] = (char) (words[i] >> 40);
+      B[i * 8 + 6] = (char) (words[i] >> 48);
+      B[i * 8 + 7] = (char) (words[i] >> 56);
     }
 }
 
