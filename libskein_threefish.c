@@ -32,37 +32,37 @@
 
 #include "libskein_threefish.h"
 
-static size_t Nr = 4;
-static size_t Nw = 72;
-static uint64_t *Pi = 0;
-static uint64_t Pi_4[4] = {0, 3, 2, 1};
-static uint64_t Pi_8[8] = {2, 1, 4, 7, 6, 5, 0, 3};
-static uint64_t Pi_16[16] = {0, 9, 2, 13, 6, 11, 4, 15,
-			     10, 7, 12, 3, 14, 5, 8, 1};
-static uint64_t R_4[8][2] = {{14, 16},
-			     {52, 57},
-			     {23, 40},
-			     {5, 37},
-			     {25, 33},
-			     {46, 12},
-			     {58, 22},
-			     {32, 32}};
-static uint64_t R_8[8][4] = {{46, 36, 19, 37},
-			     {33, 27, 14, 42},
-			     {17, 49, 36, 39},
-			     {44, 9, 54, 56},
-			     {39, 30, 34, 24},
-			     {13, 50, 10, 17},
-			     {25, 29, 39, 43},
-			     {8, 35, 56, 22}};
-static uint64_t R_16[8][8] = {{24, 13, 8, 47, 8, 17, 22, 37},
-			      {38, 19, 10, 55, 49, 18, 23, 52},
-			      {33, 4, 51, 13, 34, 41, 59, 17},
-			      {5, 20, 48, 41, 47, 28, 16, 25},
-			      {41, 9, 37, 31, 12, 47, 44, 30},
-			      {16, 34, 56, 51, 4, 53, 42, 41},
-			      {31, 44, 47, 46, 19, 42, 44, 25},
-			      {9, 48, 35, 52, 23, 31, 37, 20}};
+static size_t Nr = 72;
+static size_t Nw = 4;
+static uint8_t *Pi = 0;
+static uint8_t Pi_4[4] = {0, 3, 2, 1};
+static uint8_t Pi_8[8] = {2, 1, 4, 7, 6, 5, 0, 3};
+static uint8_t Pi_16[16] = {0, 9, 2, 13, 6, 11, 4, 15,
+			    10, 7, 12, 3, 14, 5, 8, 1};
+static uint8_t R_4[8][2] = {{14, 16},
+			    {52, 57},
+			    {23, 40},
+			    {5, 37},
+			    {25, 33},
+			    {46, 12},
+			    {58, 22},
+			    {32, 32}};
+static uint8_t R_8[8][4] = {{46, 36, 19, 37},
+			    {33, 27, 14, 42},
+			    {17, 49, 36, 39},
+			    {44, 9, 54, 56},
+			    {39, 30, 34, 24},
+			    {13, 50, 10, 17},
+			    {25, 29, 39, 43},
+			    {8, 35, 56, 22}};
+static uint8_t R_16[8][8] = {{24, 13, 8, 47, 8, 17, 22, 37},
+			     {38, 19, 10, 55, 49, 18, 23, 52},
+			     {33, 4, 51, 13, 34, 41, 59, 17},
+			     {5, 20, 48, 41, 47, 28, 16, 25},
+			     {41, 9, 37, 31, 12, 47, 44, 30},
+			     {16, 34, 56, 51, 4, 53, 42, 41},
+			     {31, 44, 47, 46, 19, 42, 44, 25},
+			     {9, 48, 35, 52, 23, 31, 37, 20}};
 static void bytesToWords(uint64_t *W,
 			 const char *bytes,
 			 const size_t bytes_size);
@@ -75,11 +75,21 @@ static void bytesToWords(uint64_t *W,
 			 const size_t bytes_size)
 {
   for(size_t i = 0; i < bytes_size / 8; i++)
-    for(size_t j = 0; j < 8; j++)
-      {
-	W[i] <<= 8;
-	W[i] += (uint64_t) bytes[i * 8 + j];
-      }
+    {
+      char b[8];
+
+      for(size_t j = 0; j < 8; j++)
+	b[j] = bytes[i * 8 + j];
+
+      W[i] = ((uint64_t) b[0] << 56) |
+	((uint64_t) b[1] << 48) |
+	((uint64_t) b[2] << 40) |
+	((uint64_t) b[3] << 32) |
+	((uint64_t) b[4] << 24) |
+	((uint64_t) b[5] << 16) |
+	((uint64_t) b[6] << 8) |
+	((uint64_t) b[7] << 0);
+    }
 }
 
 static void mix(const uint64_t x0,
@@ -88,7 +98,7 @@ static void mix(const uint64_t x0,
 		const size_t j,
 		uint64_t *y0,
 		uint64_t *y1,
-		const uint64_t block_size)
+		const size_t block_size)
 {
   /*
   ** Section 3.3.1.
@@ -101,11 +111,13 @@ static void mix(const uint64_t x0,
   */
 
   if(block_size == 256)
-    *y1 = ((x1 << R_4[d % 8][j]) | (x1 >> (64 - R_4[d % 8][j]))) ^ *y0;
+    *y1 = (x1 << R_4[d % 8][j]) | (x1 >> (64 - R_4[d % 8][j]));
   else if(block_size == 512)
-    *y1 = ((x1 << R_8[d % 8][j]) | (x1 >> (64 - R_8[d % 8][j]))) ^ *y0;
+    *y1 = (x1 << R_8[d % 8][j]) | (x1 >> (64 - R_8[d % 8][j]));
   else
-    *y1 = ((x1 << R_16[d % 8][j]) | (x1 >> (64 - R_16[d % 8][j]))) ^ *y0;
+    *y1 = (x1 << R_16[d % 8][j]) | (x1 >> (64 - R_16[d % 8][j]));
+
+  *y1 ^= *y0;
 }
 
 static void threefish_E(char *E,
@@ -162,14 +174,14 @@ static void threefish_E(char *E,
     {
       uint64_t e[Nw];
 
-      if(d % 4 == 0)
-	for(size_t i = 0; i < Nw; i++)
-	  e[i] = v[i] + s[d / 4][i];
-      else
-	for(size_t i = 0; i < Nw; i++)
-	  e[i] = v[i];
+      memset(e, 0, sizeof(e));
+
+      for(size_t i = 0; i < Nw; i++)
+	e[i] = (d % 4 == 0) ? v[i] + s[d / 4][i] : v[i];
 
       uint64_t f[Nw];
+
+      memset(f, 0, sizeof(f));
 
       for(size_t j = 0; j < Nw / 2; j++)
 	{
@@ -204,8 +216,16 @@ static void wordsToBytes(char *B,
 			 const size_t words_size)
 {
   for(size_t i = 0; i < words_size; i++)
-    for(size_t j = 0; j < 8; j++)
-      B[i * 8 + j] = (char) ((words[i] >> (8 * (7 - j))) & 0xff);
+    {
+      B[i * 8 + 0] = (char) ((words[i] >> 56) & 0xff);
+      B[i * 8 + 1] = (char) ((words[i] >> 48) & 0xff);
+      B[i * 8 + 2] = (char) ((words[i] >> 40) & 0xff);
+      B[i * 8 + 3] = (char) ((words[i] >> 32) & 0xff);
+      B[i * 8 + 4] = (char) ((words[i] >> 24) & 0xff);
+      B[i * 8 + 5] = (char) ((words[i] >> 16) & 0xff);
+      B[i * 8 + 6] = (char) ((words[i] >> 8) & 0xff);
+      B[i * 8 + 7] = (char) ((words[i] >> 0) & 0xff);
+    }
 }
 
 void libskein_threefish(char *E,
