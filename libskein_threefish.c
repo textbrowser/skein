@@ -218,13 +218,13 @@ static void wordsToBytes(char *B,
   for(size_t i = 0; i < words_size; i++)
     {
       B[i * 8 + 0] = (char) (words[i]);
-      B[i * 8 + 1] = (char) (words[i] >> 8);
-      B[i * 8 + 2] = (char) (words[i] >> 16);
-      B[i * 8 + 3] = (char) (words[i] >> 24);
-      B[i * 8 + 4] = (char) (words[i] >> 32);
-      B[i * 8 + 5] = (char) (words[i] >> 40);
-      B[i * 8 + 6] = (char) (words[i] >> 48);
-      B[i * 8 + 7] = (char) (words[i] >> 56);
+      B[i * 8 + 1] = (char) ((words[i] >> 8) & 0xff);
+      B[i * 8 + 2] = (char) ((words[i] >> 16) & 0xff);
+      B[i * 8 + 3] = (char) ((words[i] >> 24) & 0xff);
+      B[i * 8 + 4] = (char) ((words[i] >> 32) & 0xff);
+      B[i * 8 + 5] = (char) ((words[i] >> 40) & 0xff);
+      B[i * 8 + 6] = (char) ((words[i] >> 48) & 0xff);
+      B[i * 8 + 7] = (char) ((words[i] >> 56) & 0xff);
     }
 }
 
