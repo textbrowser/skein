@@ -14,7 +14,7 @@ static void test1(void)
   char T[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
   memset(E, 0, sizeof(E));
-  libskein_threefish(E, K, T, P, 256);
+  libskein_threefish(E, K, T, P, (size_t) 256);
   printf("Test #1, 256-bit Threefish: ");
 
   for(size_t i = 0; i < sizeof(E) / sizeof(E[0]); i++)
@@ -37,7 +37,7 @@ static void test2(void)
   char T[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
   memset(E, 0, sizeof(E));
-  libskein_threefish(E, K, T, P, 512);
+  libskein_threefish(E, K, T, P, (size_t) 512);
   printf("Test #2, 512-bit Threefish: ");
 
   for(size_t i = 0; i < sizeof(E) / sizeof(E[0]); i++)
