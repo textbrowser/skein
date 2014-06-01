@@ -12,12 +12,13 @@ static void test1(void)
   char P[32] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   char T[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  size_t i = 0;
 
   memset(E, 0, sizeof(E));
   libskein_threefish(E, K, T, P, (size_t) 256);
   printf("Test #1, 256-bit Threefish: ");
 
-  for(size_t i = 0; i < sizeof(E) / sizeof(E[0]); i++)
+  for(i = 0; i < sizeof(E) / sizeof(E[0]); i++)
     printf("%02x", E[i] & 0xff);
 
   printf(".\n");
@@ -35,12 +36,13 @@ static void test2(void)
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   char T[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  size_t i = 0;
 
   memset(E, 0, sizeof(E));
   libskein_threefish(E, K, T, P, (size_t) 512);
   printf("Test #2, 512-bit Threefish: ");
 
-  for(size_t i = 0; i < sizeof(E) / sizeof(E[0]); i++)
+  for(i = 0; i < sizeof(E) / sizeof(E[0]); i++)
     printf("%02x", E[i] & 0xff);
 
   printf(".\n");

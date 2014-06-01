@@ -1,4 +1,4 @@
-CFLAGS = -fPIC -std=c99 -Wall -Wconversion -Werror -Wextra
+CFLAGS = -fPIC -Wall -Wconversion -Werror -Wextra
 
 OBJECT_FILES = libskein_threefish.o \
 	       libskein_ubi.o

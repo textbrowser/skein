@@ -66,6 +66,7 @@ static uint8_t R_16[8][8] = {{24, 13, 8, 47, 8, 17, 22, 37},
 static void bytesToWords(uint64_t *W,
 			 const char *bytes,
 			 const size_t bytes_size);
+static void purge(void *buffer, const size_t buffer_size);
 static void wordsToBytes(char *B,
 			 const uint64_t *words,
 			 const size_t words_size);
@@ -74,11 +75,17 @@ static void bytesToWords(uint64_t *W,
 			 const char *bytes,
 			 const size_t bytes_size)
 {
-  for(size_t i = 0; i < bytes_size / 8; i++)
+  if(!W || !bytes || bytes_size <= 0)
+    return;
+
+  size_t i = 0;
+
+  for(i = 0; i < bytes_size / 8; i++)
     {
       char b[8];
+      size_t j = 0;
 
-      for(size_t j = 0; j < 8; j++)
+      for(j = 0; j < 8; j++)
 	b[j] = bytes[i * 8 + j];
 
       W[i] = ((uint64_t) b[0]) |
@@ -100,6 +107,9 @@ static void mix(const uint64_t x0,
 		uint64_t *y1,
 		const size_t block_size)
 {
+  if(!y0 || !y1)
+    return;
+
   /*
   ** Section 3.3.1.
   */
@@ -120,6 +130,24 @@ static void mix(const uint64_t x0,
   *y1 ^= *y0;
 }
 
+static void purge(void *buffer,
+		  const size_t buffer_size)
+{
+  if(!buffer || buffer_size <= 0)
+    return;
+
+  char *b = buffer;
+  size_t bs = buffer_size;
+
+  do
+    {
+      *b = 0;
+      b += 1;
+      bs -= 1;
+    }
+  while(bs > 0);
+}
+
 static void threefish_E(char *E,
 			const char *K,
 			const char *T,
@@ -130,6 +158,9 @@ static void threefish_E(char *E,
   ** Section 3.3.
   */
 
+  size_t d = 0;
+  size_t i = 0;
+  size_t j = 0;
   uint64_t C240 = 0x1bd11bdaa9fc1a22;
   uint64_t c[Nw];
   uint64_t k[Nw + 1];
@@ -143,12 +174,12 @@ static void threefish_E(char *E,
   bytesToWords(p, P, (size_t) block_size / 8);
   bytesToWords(t, T, (size_t) 16);
 
-  for(size_t i = 0; i < Nw; i++)
+  for(i = 0; i < Nw; i++)
     kNw ^= k[i]; // Section 3.3.2.
 
   k[Nw] = kNw;
 
-  for(size_t i = 0; i < Nw; i++)
+  for(i = 0; i < Nw; i++)
     v[i] = p[i];
 
   t[2] = t[0] ^ t[1]; // Section 3.3.2.
@@ -157,8 +188,8 @@ static void threefish_E(char *E,
   ** Prepare the key schedule, section 3.3.2.
   */
 
-  for(size_t d = 0; d < Nr / 4 + 1; d++) // d rounds.
-    for(size_t i = 0; i < Nw; i++)
+  for(d = 0; d < Nr / 4 + 1; d++) // d rounds.
+    for(i = 0; i < Nw; i++)
       {	
 	s[d][i] = k[(d + i) % (Nw + 1)];
 
@@ -170,20 +201,16 @@ static void threefish_E(char *E,
 	  s[d][i] += t[d % 3];
       }
 
-  for(size_t d = 0; d < Nr; d++) // d rounds.
+  for(d = 0; d < Nr; d++) // d rounds.
     {
       uint64_t e[Nw];
 
-      memset(e, 0, sizeof(e));
-
-      for(size_t i = 0; i < Nw; i++)
+      for(i = 0; i < Nw; i++)
 	e[i] = (d % 4 == 0) ? v[i] + s[d / 4][i] : v[i];
 
       uint64_t f[Nw];
 
-      memset(f, 0, sizeof(f));
-
-      for(size_t j = 0; j < Nw / 2; j++)
+      for(j = 0; j < Nw / 2; j++)
 	{
 	  uint64_t x0 = e[j * 2];
 	  uint64_t x1 = e[j * 2 + 1];
@@ -195,27 +222,29 @@ static void threefish_E(char *E,
 	  f[j * 2 + 1] = y1;
 	}
 
-      for(size_t i = 0; i < Nw; i++)
+      for(i = 0; i < Nw; i++)
 	v[i] = f[Pi[i]];
     }
 
-  for(size_t i = 0; i < Nw; i++)
+  for(i = 0; i < Nw; i++)
     c[i] = v[i] + s[Nr / 4][i];
 
   wordsToBytes(E, c, Nw);
-  memset(c, 0, sizeof(c));
-  memset(k, 0, sizeof(k));
-  memset(p, 0, sizeof(p));
-  memset(s, 0, sizeof(s));
-  memset(t, 0, sizeof(t));
-  memset(v, 0, sizeof(v));
+  purge(c, sizeof(c));
+  purge(k, sizeof(k));
+  purge(p, sizeof(p));
+  purge(s, sizeof(s));
+  purge(t, sizeof(t));
+  purge(v, sizeof(v));
 }
 
 static void wordsToBytes(char *B,
 			 const uint64_t *words,
 			 const size_t words_size)
 {
-  for(size_t i = 0; i < words_size; i++)
+  size_t i = 0;
+
+  for(i = 0; i < words_size; i++)
     {
       B[i * 8 + 0] = (char) (words[i]);
       B[i * 8 + 1] = (char) ((words[i] >> 8) & 0xff);
@@ -234,6 +263,9 @@ void libskein_threefish(char *E,
 			const char *P,
 			const size_t block_size)
 {
+  if(!E || !K || !P || !T || block_size <= 0)
+    return;
+
   if(block_size == 256)
     {
       Nr = 72;
