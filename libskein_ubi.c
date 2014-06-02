@@ -31,29 +31,16 @@
 
 #include "libskein_ubi.h"
 
-char *libskein_ubi1024(const char *G,
-		       const size_t G_size,
-		       const char *M,
-		       const size_t M_size,
-		       const uint64_t *T)
+char *libskein_ubi(const char *G,
+		   const char *M,
+		   const size_t M_size,
+		   const char *T,
+		   const size_t block_size)
 {
   char *ubi = 0;
 
-  if(!G || G_size <= 0 ||
-     !M || M_size <= 0 ||
-     !T)
+  if(!G || !M || M_size <= 0 || !T || block_size <= 0)
     return ubi;
 
-  char *M_1 = (char *) malloc(M_size);
-
-  if(!M_1)
-    goto done_label;
-  else
-    memcpy(M_1, M, M_size);
-
- done_label:
-  memset(M_1, 0, M_size);
-  free(M_1);
-  M_1 = 0;
   return ubi;
 }

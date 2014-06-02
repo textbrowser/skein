@@ -8,7 +8,7 @@ all:	$(OBJECT_FILES)
 	gcc test.c -o test.exe -L. -lskein -Wl,-rpath,.
 
 libskein_threefish.o: libskein_threefish.c libskein_threefish.h
-        gcc $(CFLAGS) -c -o libskein_threefish.o libskein_threefish.c
+	gcc $(CFLAGS) -c -o libskein_threefish.o libskein_threefish.c
 
 libskein_ubi.o:	libskein_ubi.c libskein_ubi.h
 	gcc $(CFLAGS) -c -o libskein_ubi.o libskein_ubi.c
