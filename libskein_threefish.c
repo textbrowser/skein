@@ -25,9 +25,12 @@
 ** SKEIN, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+extern "C"
+{
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+}
 
 #include "libskein_threefish.h"
 
@@ -133,7 +136,7 @@ static void purge(void *buffer,
   if(!buffer || buffer_size <= 0)
     return;
 
-  char *b = buffer;
+  char *b = (char *) buffer;
   size_t bs = buffer_size;
 
   do

@@ -1,17 +1,17 @@
-CFLAGS = -fPIC -Wall -Wconversion -Werror -Wextra
+CXXFLAGS = -fPIC -Wall -Wconversion -Werror -Wextra
 
 OBJECT_FILES = libskein_threefish.o \
 	       libskein_ubi.o
 
 all:	$(OBJECT_FILES)
-	gcc -shared -Wl,-soname,libskein.so -o libskein.so $?
-	gcc $(CFLAGS) test.c -o test -L. -lskein -Wl,-rpath,.
+	g++ -shared -Wl,-soname,libskein.so -o libskein.so $?
+	g++ $(CXXFLAGS) test.c -o test -L. -lskein -Wl,-rpath,.
 
 libskein_threefish.o: libskein_threefish.c libskein_threefish.h
-	gcc $(CFLAGS) -c -o libskein_threefish.o libskein_threefish.c
+	g++ $(CXXFLAGS) -c -o libskein_threefish.o libskein_threefish.c
 
 libskein_ubi.o:	libskein_ubi.c libskein_ubi.h
-	gcc $(CFLAGS) -c -o libskein_ubi.o libskein_ubi.c
+	g++ $(CXXFLAGS) -c -o libskein_ubi.o libskein_ubi.c
 
 clean:
 	rm -f *.o libskein.so
@@ -22,7 +22,7 @@ install: all
 	install -o root -g root libskein.so /usr/local/lib
 
 library: $(OBJECT_FILES)
-	gcc -shared -Wl,-soname,libskein.so -o libskein.so $?
+	g++ -shared -Wl,-soname,libskein.so -o libskein.so $?
 
 purge:
 	rm -f *~*

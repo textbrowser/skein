@@ -1,17 +1,17 @@
-CFLAGS = -fPIC -Wall -Wconversion -Werror -Wextra
+CXXFLAGS = -fPIC -Wall -Wconversion -Werror -Wextra
 
 OBJECT_FILES = libskein_threefish.o \
 	       libskein_ubi.o
 
 all:	$(OBJECT_FILES)
-	gcc -dynamiclib -o libskein.dylib $?
-	gcc $(CFLAGS) test.c -o test -L. -lskein
+	g++ -dynamiclib -o libskein.dylib $?
+	g++ $(CXXFLAGS) test.c -o test -L. -lskein
 
 libskein_threefish.o: libskein_threefish.c libskein_threefish.h
-	gcc $(CFLAGS) -c -o libskein_threefish.o libskein_threefish.c
+	g++ $(CXXFLAGS) -c -o libskein_threefish.o libskein_threefish.c
 
 libskein_ubi.o:	libskein_ubi.c libskein_ubi.h
-	gcc $(CFLAGS) -c -o libskein_ubi.o libskein_ubi.c
+	g++ $(CXXFLAGS) -c -o libskein_ubi.o libskein_ubi.c
 
 clean:
 	rm -f *.o libskein.dylib
@@ -22,7 +22,7 @@ install: all
 	install -o root -g wheel libskein.dylib /usr/local/lib
 
 library: $(OBJECT_FILES)
-	gcc -dynamiclib -o libskein.dylib $?
+	g++ -dynamiclib -o libskein.dylib $?
 
 purge:
 	rm -f *~*
