@@ -224,6 +224,9 @@ static void threefish_E(char *E,
 
       for(i = 0; i < Nw; i++)
 	v[i] = f[Pi[i]];
+
+      purge(e, sizeof(e));
+      purge(t, sizeof(t));
     }
 
   for(i = 0; i < Nw; i++)
