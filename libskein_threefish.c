@@ -26,14 +26,13 @@
 */
 
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "libskein_threefish.h"
 
-static size_t Nr = 72;
-static size_t Nw = 4;
+static size_t Nr = 0;
+static size_t Nw = 0;
 static uint8_t *Pi = 0;
 static uint8_t Pi_4[4] = {0, 3, 2, 1};
 static uint8_t Pi_8[8] = {2, 1, 4, 7, 6, 5, 0, 3};
@@ -88,7 +87,7 @@ static void bytesToWords(uint64_t *W,
       for(j = 0; j < 8; j++)
 	b[j] = bytes[i * 8 + j];
 
-      W[i] = ((uint64_t) b[0]) |
+      W[i] = (uint64_t) b[0] |
 	((uint64_t) b[1] << 8) |
 	((uint64_t) b[2] << 16) |
 	((uint64_t) b[3] << 24) |
@@ -121,13 +120,11 @@ static void mix(const uint64_t x0,
   */
 
   if(block_size == 256)
-    *y1 = (x1 << R_4[d % 8][j]) | (x1 >> (64 - R_4[d % 8][j]));
+    *y1 = ((x1 << R_4[d % 8][j]) | (x1 >> (64 - R_4[d % 8][j]))) ^ *y0;
   else if(block_size == 512)
-    *y1 = (x1 << R_8[d % 8][j]) | (x1 >> (64 - R_8[d % 8][j]));
+    *y1 = ((x1 << R_8[d % 8][j]) | (x1 >> (64 - R_8[d % 8][j]))) ^ *y0;
   else
-    *y1 = (x1 << R_16[d % 8][j]) | (x1 >> (64 - R_16[d % 8][j]));
-
-  *y1 ^= *y0;
+    *y1 = ((x1 << R_16[d % 8][j]) | (x1 >> (64 - R_16[d % 8][j]))) ^ *y0;
 }
 
 static void purge(void *buffer,
@@ -249,7 +246,7 @@ static void wordsToBytes(char *B,
 
   for(i = 0; i < words_size; i++)
     {
-      B[i * 8 + 0] = (char) (words[i]);
+      B[i * 8 + 0] = (char) words[i];
       B[i * 8 + 1] = (char) ((words[i] >> 8) & 0xff);
       B[i * 8 + 2] = (char) ((words[i] >> 16) & 0xff);
       B[i * 8 + 3] = (char) ((words[i] >> 24) & 0xff);
