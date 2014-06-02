@@ -37,6 +37,10 @@ char *libskein_ubi(const char *G,
 		   const char *T,
 		   const size_t block_size)
 {
+  /*
+  ** Section 3.4.
+  */
+
   char *ubi = 0;
 
   if(!G || !M || M_size <= 0 || !T || block_size <= 0)
