@@ -25,12 +25,9 @@
 ** SKEIN, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-extern "C"
-{
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-}
 
 #include "libskein_threefish.h"
 
