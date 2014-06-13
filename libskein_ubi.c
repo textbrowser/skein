@@ -32,19 +32,61 @@
 #include "libskein_ubi.h"
 
 char *libskein_ubi(const char *G,
+		   const size_t G_size,
 		   const char *M,
 		   const size_t M_size,
 		   const char *T,
-		   const size_t block_size)
+		   const size_t Nb,
+		   const size_t bit_count)
 {
   /*
   ** Section 3.4.
   */
 
+  char *H = 0;
+  char *Mp = 0;
+  char *Mpp = 0;
   char *ubi = 0;
+  size_t NM = 0;
+  size_t i = 0;
+  size_t k = 0;
+  size_t p = 0;
+  uint16_t B = 0;
 
-  if(!G || !M || M_size <= 0 || !T || block_size <= 0)
+  if(!G || G_size <= 0 || !M || M_size <= 0 || !T || bit_count <= 0)
     return ubi;
 
+  Mp = (char *) malloc(M_size);
+
+  if(!Mp)
+    return ubi;
+  else
+    memcpy(Mp, M, M_size);
+
+  if((bit_count & 7) != 0)
+    {
+      B = 1;
+      Mp[M_size - 1] = (char) (1 << (7 - (bit_count & 7)));
+    }
+
+  NM = M_size;
+
+  if(NM == 0)
+    p = Nb;
+  else
+    p = llabs(-NM % Nb);
+
+  Mpp = (char *) malloc(NM + p);
+  memset(Mpp, 0, NM + p);
+  memcpy(Mpp, Mp, NM);
+  k = (NM + p) / Nb;
+
+  for(i = 0; i < k; i++)
+    {
+    }
+
+  free(H);
+  free(Mp);
+  free(Mpp);
   return ubi;
 }
