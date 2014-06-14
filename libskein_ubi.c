@@ -74,7 +74,7 @@ char *libskein_ubi(const char *G,
   if(NM == 0)
     p = Nb;
   else
-    p = llabs(-NM % Nb);
+    p = NM % Nb;
 
   Mpp = (char *) malloc(NM + p);
   memset(Mpp, 0, NM + p);
