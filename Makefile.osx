@@ -1,4 +1,6 @@
-CFLAGS = -fPIC -Wall -Wconversion -Werror -Wextra
+CFLAGS = -fPIC -Wall -Wconversion -Werror -Wextra \
+	 -Wformat=2 -Wpointer-arith -Wstrict-prototypes \
+	 -Wstrict-overflow=5
 
 OBJECT_FILES = libskein_threefish.o \
 	       libskein_ubi.o

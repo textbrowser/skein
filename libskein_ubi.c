@@ -69,6 +69,7 @@ char *libskein_ubi(const char *G,
       Mp[M_size - 1] = (char) (1 << (7 - (bit_count & 7)));
     }
 
+  (void) B;
   NM = M_size;
 
   if(NM == 0)
