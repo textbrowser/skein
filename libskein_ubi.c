@@ -60,16 +60,19 @@ char *libskein_ubi(const char *G,
 
   if(!Mp)
     return ubi;
-  else
-    memcpy(Mp, M, M_size);
 
   if((bit_count & 7) != 0)
     {
       B = 1;
+      memcpy(Mp, M, M_size);
       Mp[M_size - 1] = (char) (1 << (7 - (bit_count & 7)));
     }
+  else
+    {
+      B = 0;
+      memcpy(Mp, M, M_size);
+    }
 
-  (void) B;
   NM = M_size;
 
   if(NM == 0)
