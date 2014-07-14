@@ -77,6 +77,8 @@ char *libskein_ubi(const char *G,
 
   if(NM == 0)
     p = Nb;
+  else if(NM < Nb)
+    p = Nb - NM;
   else
     p = NM % Nb;
 
