@@ -56,22 +56,27 @@ char *libskein_ubi(const char *G,
   if(!G || G_size <= 0 || !M || M_size <= 0 || !T || bit_count <= 0)
     return ubi;
 
+  H = (char *) malloc(G_size);
+
+  if(!H)
+    goto done;
+  else
+    memcpy(H, G, G_size);
+
   Mp = (char *) malloc(M_size);
 
   if(!Mp)
-    return ubi;
+    goto done;
+  else
+    memcpy(Mp, M, M_size);
 
   if((bit_count & 7) != 0)
     {
       B = 1;
-      memcpy(Mp, M, M_size);
       Mp[M_size - 1] = (char) (1 << (7 - (bit_count & 7)));
     }
   else
-    {
-      B = 0;
-      memcpy(Mp, M, M_size);
-    }
+    B = 0;
 
   NM = M_size;
 
@@ -91,6 +96,7 @@ char *libskein_ubi(const char *G,
     {
     }
 
+ done:
   free(H);
   free(Mp);
   free(Mpp);
