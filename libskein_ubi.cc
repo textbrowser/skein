@@ -105,8 +105,8 @@ char *libskein_ubi(const char *G,
     }
 
  done:
-  free(H);
-  free(Mp);
-  free(Mpp);
+  delete []H;
+  delete []Mp;
+  delete []Mpp;
   return ubi;
 }
