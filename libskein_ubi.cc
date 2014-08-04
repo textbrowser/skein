@@ -67,7 +67,7 @@ char *libskein_ubi(const char *G,
   size_t k = 0;
   size_t p = 0;
   uint16_t B = 0;
-  uint64_t t[3];
+  uint64_t T[3];
 
   if(!G || G_size <= 0 || !M || M_size <= 0 || bit_count <= 0)
     return ubi;
@@ -119,9 +119,9 @@ char *libskein_ubi(const char *G,
   memset(Mpp, 0, NM + p);
   memcpy(Mpp, Mp, NM);
   k = (NM + p) / Nb;
-  t[0] = 0LL; // Position.
-  t[1] = ((uint64_t) Type) << 56; // Type field.
-  t[1] |= 1LL << 63; // First.
+  T[0] = 0LL; // Position.
+  T[1] = ((uint64_t) Type) << 56; // Type field.
+  T[1] |= 1LL << 63; // First.
 
   for(i = 0; i < k; i++)
     {
