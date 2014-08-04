@@ -1,30 +1,31 @@
 CFLAGS = -fPIC -Wall -Wconversion -Werror -Wextra \
-	 -Wformat=2 -Wpointer-arith -Wstrict-prototypes \
+	 -Wformat=2 -Wpointer-arith \
 	 -Wstrict-overflow=5
 
+CC = clang++
 OBJECT_FILES = libskein_threefish.o \
 	       libskein_ubi.o
 
 all:	$(OBJECT_FILES)
-	clang -shared -Wl,-soname,libskein.so -o libskein.so $?
-	clang $(CFLAGS) test.c -o test -L. -lskein -Wl,-rpath,.
+	$(CXX) -shared -Wl,-soname,libskein.so -o libskein.so $?
+	$(CXX) $(CFLAGS) test.c -o test -L. -lskein -Wl,-rpath,.
 
 libskein_threefish.o: libskein_threefish.c libskein_threefish.h
-	clang $(CFLAGS) -c -o libskein_threefish.o libskein_threefish.c
+	$(CXX) $(CFLAGS) -c -o libskein_threefish.o libskein_threefish.c
 
 libskein_ubi.o:	libskein_ubi.c libskein_ubi.h
-	clang $(CFLAGS) -c -o libskein_ubi.o libskein_ubi.c
+	$(CXX) $(CFLAGS) -c -o libskein_ubi.o libskein_ubi.c
 
 clean:
 	rm -f *.o libskein.so
 	rm -f test
 
 install: all
-	install -o root -g root -d /usr/local/lib
-	install -o root -g root libskein.so /usr/local/lib
+	install -o root -g wheel -d /usr/local/lib
+	install -o root -g wheel libskein.so /usr/local/lib
 
 library: $(OBJECT_FILES)
-	clang -shared -Wl,-soname,libskein.so -o libskein.so $?
+	$(CXX) -shared -Wl,-soname,libskein.so -o libskein.so $?
 
 purge:
 	rm -f *~*

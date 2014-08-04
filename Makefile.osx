@@ -1,19 +1,20 @@
 CFLAGS = -fPIC -Wall -Wconversion -Werror -Wextra \
-	 -Wformat=2 -Wpointer-arith -Wstrict-prototypes \
+	 -Wformat=2 -Wpointer-arith \
 	 -Wstrict-overflow=5
 
+CXX = clang++
 OBJECT_FILES = libskein_threefish.o \
 	       libskein_ubi.o
 
 all:	$(OBJECT_FILES)
-	clang -dynamiclib -o libskein.dylib $?
-	clang $(CFLAGS) test.c -o test -L. -lskein
+	$(CXX) -dynamiclib -o libskein.dylib $?
+	$(CXX) $(CFLAGS) test.c -o test -L. -lskein
 
 libskein_threefish.o: libskein_threefish.c libskein_threefish.h
-	clang $(CFLAGS) -c -o libskein_threefish.o libskein_threefish.c
+	$(CXX) $(CFLAGS) -c -o libskein_threefish.o libskein_threefish.c
 
 libskein_ubi.o:	libskein_ubi.c libskein_ubi.h
-	clang $(CFLAGS) -c -o libskein_ubi.o libskein_ubi.c
+	$(CXX) $(CFLAGS) -c -o libskein_ubi.o libskein_ubi.c
 
 clean:
 	rm -f *.o libskein.dylib
@@ -24,7 +25,7 @@ install: all
 	install -o root -g wheel libskein.dylib /usr/local/lib
 
 library: $(OBJECT_FILES)
-	clang -dynamiclib -o libskein.dylib $?
+	$(CXX) -dynamiclib -o libskein.dylib $?
 
 purge:
 	rm -f *~*

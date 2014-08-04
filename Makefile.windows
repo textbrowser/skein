@@ -1,24 +1,25 @@
 CFLAGS = -fPIC -Wall -Wconversion -Werror -Wextra
 
+CXX = g++
 OBJECT_FILES = libskein_threefish.o \
 	       libskein_ubi.o
 
 all:	$(OBJECT_FILES)
-	gcc -shared -o libskein.dll $(OBJECT_FILES)
-	gcc test.c -o test.exe -L. -lskein -Wl,-rpath,.
+	$(CXX) -shared -o libskein.dll $(OBJECT_FILES)
+	$(CXX) test.c -o test.exe -L. -lskein -Wl,-rpath,.
 
 libskein_threefish.o: libskein_threefish.c libskein_threefish.h
-	gcc $(CFLAGS) -c -o libskein_threefish.o libskein_threefish.c
+	$(CXX) $(CFLAGS) -c -o libskein_threefish.o libskein_threefish.c
 
 libskein_ubi.o:	libskein_ubi.c libskein_ubi.h
-	gcc $(CFLAGS) -c -o libskein_ubi.o libskein_ubi.c
+	$(CXX) $(CFLAGS) -c -o libskein_ubi.o libskein_ubi.c
 
 clean:
 	del /f *.o libskein.so
 	del /f test.exe
 
 library: $(OBJECT_FILES)
-	gcc -shared -o libskein.dll $(OBJECT_FILES)
+	$(CXX) -shared -o libskein.dll $(OBJECT_FILES)
 
 purge:
 	del /f *~*
