@@ -37,7 +37,7 @@ char *libskein_ubi(const char *G,
 		   const size_t G_size,
 		   const char *M,
 		   const size_t M_size,
-		   const char *T,
+		   const short Type,
 		   const size_t Nb,
 		   const size_t bit_count);
 

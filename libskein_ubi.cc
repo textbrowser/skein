@@ -35,11 +35,20 @@ extern "C"
 #include <new>
 #include "libskein_ubi.h"
 
+static const short UBI_TYPE_KEY = 0;
+static const short UBI_TYPE_CFG = 4;
+static const short UBI_TYPE_PRS = 8;
+static const short UBI_TYPE_PK = 12;
+static const short UBI_TYPE_KDF = 16;
+static const short UBI_TYPE_NON = 20;
+static const short UBI_TYPE_MSG = 48;
+static const short UBI_TYPE_OUT = 63;
+
 char *libskein_ubi(const char *G,
 		   const size_t G_size,
 		   const char *M,
 		   const size_t M_size,
-		   const char *T,
+		   const short Type,
 		   const size_t Nb,
 		   const size_t bit_count)
 {
@@ -48,16 +57,19 @@ char *libskein_ubi(const char *G,
   */
 
   char *H = 0;
+  char *Mi = 0;
   char *Mp = 0;
   char *Mpp = 0;
   char *ubi = 0;
   size_t NM = 0;
   size_t i = 0;
+  size_t j = 0;
   size_t k = 0;
   size_t p = 0;
   uint16_t B = 0;
+  uint64_t t[3];
 
-  if(!G || G_size <= 0 || !M || M_size <= 0 || !T || bit_count <= 0)
+  if(!G || G_size <= 0 || !M || M_size <= 0 || bit_count <= 0)
     return ubi;
 
   H = new (std::nothrow) char[G_size];
@@ -66,6 +78,11 @@ char *libskein_ubi(const char *G,
     goto done;
   else
     memcpy(H, G, G_size);
+
+  Mi = new (std::nothrow) char[Nb];
+
+  if(!Mi)
+    goto done;
 
   Mp = new (std::nothrow) char[M_size];
 
@@ -91,7 +108,10 @@ char *libskein_ubi(const char *G,
   else
     p = NM % Nb;
 
-  Mpp = new (std::nothrow) char[NM + p];
+  Mpp = new (std::nothrow) char[NM + p]; /*
+					 ** Number of bytes in M' plus
+					 ** p.
+					 */
 
   if(!Mpp)
     goto done;
@@ -99,13 +119,19 @@ char *libskein_ubi(const char *G,
   memset(Mpp, 0, NM + p);
   memcpy(Mpp, Mp, NM);
   k = (NM + p) / Nb;
+  t[0] = 0LL; // Position.
+  t[1] = ((uint64_t) Type) << 56; // Type field.
+  t[1] |= 1LL << 63; // First.
 
   for(i = 0; i < k; i++)
     {
+      for(j = 0; j < Nb; j++)
+	Mi[j] = Mpp[j + i * Nb];
     }
 
  done:
   delete []H;
+  delete []Mi;
   delete []Mp;
   delete []Mpp;
   return ubi;
