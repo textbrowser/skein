@@ -25,23 +25,32 @@
 ** SKEIN, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef LIBSKEIN_THREEFISH_H
-#define LIBSKEIN_THREEFISH_H
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 #include "libskein_utils.h"
 
-void libskein_threefish(char *E,
-			const char *K,
-			const char *T,
-			const char *P,
-			const size_t block_size);
+void libskein_bytesToWords(uint64_t *W,
+			   const char *bytes,
+			   const size_t bytes_size)
+{
+  if(!W || !bytes || bytes_size <= 0)
+    return;
 
-#ifdef __cplusplus
+  size_t i = 0;
+
+  for(i = 0; i < bytes_size / 8; i++)
+    {
+      char b[8];
+      size_t j = 0;
+
+      for(j = 0; j < 8; j++)
+	b[j] = bytes[i * 8 + j];
+
+      W[i] = (uint64_t) b[0] |
+	((uint64_t) b[1] << 8) |
+	((uint64_t) b[2] << 16) |
+	((uint64_t) b[3] << 24) |
+	((uint64_t) b[4] << 32) |
+	((uint64_t) b[5] << 40) |
+	((uint64_t) b[6] << 48) |
+	((uint64_t) b[7] << 56);
+    }
 }
-#endif
-#endif

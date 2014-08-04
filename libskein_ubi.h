@@ -33,13 +33,15 @@ extern "C"
 {
 #endif
 
-char *libskein_ubi(const char *G,
-		   const size_t G_size,
-		   const char *M,
-		   const size_t M_size,
-		   const short Type,
-		   const size_t Nb,
-		   const size_t bit_count);
+#include "libskein_utils.h"
+
+uint64_t *libskein_ubi(const uint64_t *G,
+		       const size_t G_size,
+		       const char *M,
+		       const size_t M_size,
+		       const short Type,
+		       const size_t Nb,
+		       const size_t bit_count);
 
 #ifdef __cplusplus
 }

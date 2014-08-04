@@ -32,7 +32,9 @@ extern "C"
 #include <string.h>
 }
 
+#include <algorithm>
 #include <new>
+
 #include "libskein_ubi.h"
 
 static const short UBI_TYPE_KEY = 0;
@@ -44,42 +46,42 @@ static const short UBI_TYPE_NON = 20;
 static const short UBI_TYPE_MSG = 48;
 static const short UBI_TYPE_OUT = 63;
 
-char *libskein_ubi(const char *G,
-		   const size_t G_size,
-		   const char *M,
-		   const size_t M_size,
-		   const short Type,
-		   const size_t Nb,
-		   const size_t bit_count)
+uint64_t *libskein_ubi(const uint64_t *G,
+		       const size_t G_size,
+		       const char *M,
+		       const size_t M_size,
+		       const short Type,
+		       const size_t Nb,
+		       const size_t bit_count)
 {
   /*
   ** Section 3.4.
   */
 
-  char *H = 0;
-  char *Mi = 0;
   char *Mp = 0;
-  char *Mpp = 0;
-  char *ubi = 0;
+  libskein_tweak T(Type);
   size_t NM = 0;
   size_t i = 0;
   size_t j = 0;
   size_t k = 0;
   size_t p = 0;
   uint16_t B = 0;
-  uint64_t T[3];
+  uint64_t *H = 0;
+  uint64_t *Mi = 0;
+  uint64_t *Mpp = 0;
+  uint64_t *ubi = 0;
 
   if(!G || G_size <= 0 || !M || M_size <= 0 || bit_count <= 0)
     return ubi;
 
-  H = new (std::nothrow) char[G_size];
+  H = new (std::nothrow) uint64_t[G_size];
 
   if(!H)
     goto done;
   else
     memcpy(H, G, G_size);
 
-  Mi = new (std::nothrow) char[Nb];
+  Mi = new (std::nothrow) uint64_t[Nb];
 
   if(!Mi)
     goto done;
@@ -108,10 +110,10 @@ char *libskein_ubi(const char *G,
   else
     p = NM % Nb;
 
-  Mpp = new (std::nothrow) char[NM + p]; /*
-					 ** Number of bytes in M' plus
-					 ** p.
-					 */
+  Mpp = new (std::nothrow) uint64_t[NM + p]; /*
+					     ** Number of bytes in M' plus
+					     ** p.
+					     */
 
   if(!Mpp)
     goto done;
@@ -119,12 +121,11 @@ char *libskein_ubi(const char *G,
   memset(Mpp, 0, NM + p);
   memcpy(Mpp, Mp, NM);
   k = (NM + p) / Nb;
-  T[0] = 0LL; // Position.
-  T[1] = ((uint64_t) Type) << 56; // Type field.
-  T[1] |= 1LL << 63; // First.
 
   for(i = 0; i < k; i++)
     {
+      T.setPosition((uint64_t) std::min(NM, (i + 1) * Nb));
+
       for(j = 0; j < Nb; j++)
 	Mi[j] = Mpp[j + i * Nb];
     }

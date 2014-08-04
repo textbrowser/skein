@@ -25,21 +25,74 @@
 ** SKEIN, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef LIBSKEIN_THREEFISH_H
-#define LIBSKEIN_THREEFISH_H
+#ifndef _libskein_utils_h_
+#define _libskein_utils_h_
+
+extern "C"
+{
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+}
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include "libskein_utils.h"
+void libskein_bytesToWords(uint64_t *W,
+			   const char *bytes,
+			   const size_t bytes_size);
 
-void libskein_threefish(char *E,
-			const char *K,
-			const char *T,
-			const char *P,
-			const size_t block_size);
+class libskein_tweak
+{
+  /*
+  **  Please refer to section 3.4 of the official document.
+  */
+
+ public:
+  libskein_tweak(const short type)
+  {
+    m_t[0] = 0ULL; // Position.
+    m_t[1] = ((uint64_t) type) << 56; /*
+				      ** Type.
+				      ** 56 = 120 - 64.
+				      */
+    m_type = type;
+  }
+
+  bool isFirst(void) const
+  {
+    return m_t[1] & (1ULL << 62); // 62 = 126 - 64.
+  }
+
+  bool isLast(void) const
+  {
+    return m_t[1] & (1ULL << 63); // 63 = 127 - 64.
+  }
+
+  bool isPadded(void) const
+  {
+    return m_t[1] & (1ULL << 55); // 55 = 119 - 64.
+  }
+
+  void setPadded(const bool padded)
+  {
+    if(padded)
+      m_t[1] |= (1ULL << 55); // 55 = 119 - 64.
+    else
+      m_t[1] &= ~(1ULL << 55); // 55 = 119 - 64.
+  }
+
+  void setPosition(const uint64_t position)
+  {
+    m_t[0] = position;
+  }
+
+ private:
+  short m_type;
+  uint64_t m_t[2];
+};
 
 #ifdef __cplusplus
 }

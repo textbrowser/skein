@@ -25,13 +25,6 @@
 ** SKEIN, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-extern "C"
-{
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-}
-
 #include "libskein_threefish.h"
 
 static size_t Nr = 0;
@@ -65,41 +58,10 @@ static uint8_t R_16[8][8] = {{24, 13, 8, 47, 8, 17, 22, 37},
 			     {16, 34, 56, 51, 4, 53, 42, 41},
 			     {31, 44, 47, 46, 19, 42, 44, 25},
 			     {9, 48, 35, 52, 23, 31, 37, 20}};
-static void bytesToWords(uint64_t *W,
-			 const char *bytes,
-			 const size_t bytes_size);
 static void purge(void *buffer, const size_t buffer_size);
 static void wordsToBytes(char *B,
 			 const uint64_t *words,
 			 const size_t words_size);
-
-static void bytesToWords(uint64_t *W,
-			 const char *bytes,
-			 const size_t bytes_size)
-{
-  if(!W || !bytes || bytes_size <= 0)
-    return;
-
-  size_t i = 0;
-
-  for(i = 0; i < bytes_size / 8; i++)
-    {
-      char b[8];
-      size_t j = 0;
-
-      for(j = 0; j < 8; j++)
-	b[j] = bytes[i * 8 + j];
-
-      W[i] = (uint64_t) b[0] |
-	((uint64_t) b[1] << 8) |
-	((uint64_t) b[2] << 16) |
-	((uint64_t) b[3] << 24) |
-	((uint64_t) b[4] << 32) |
-	((uint64_t) b[5] << 40) |
-	((uint64_t) b[6] << 48) |
-	((uint64_t) b[7] << 56);
-    }
-}
 
 static void mix(const uint64_t x0,
 		const uint64_t x1,
@@ -170,9 +132,9 @@ static void threefish_E(char *E,
   uint64_t t[3];
   uint64_t v[Nw];
 
-  bytesToWords(k, K, (size_t) block_size / 8);
-  bytesToWords(p, P, (size_t) block_size / 8);
-  bytesToWords(t, T, (size_t) 16);
+  libskein_bytesToWords(k, K, (size_t) block_size / 8);
+  libskein_bytesToWords(p, P, (size_t) block_size / 8);
+  libskein_bytesToWords(t, T, (size_t) 16);
 
   for(i = 0; i < Nw; i++)
     kNw ^= k[i]; // Section 3.3.2.
