@@ -8,13 +8,13 @@ OBJECT_FILES = libskein_threefish.o \
 
 all:	$(OBJECT_FILES)
 	$(CXX) -shared -Wl,-soname,libskein.so -o libskein.so $?
-	$(CXX) $(CFLAGS) test.c -o test -L. -lskein -Wl,-rpath,.
+	$(CXX) $(CFLAGS) test.cc -o test -L. -lskein -Wl,-rpath,.
 
-libskein_threefish.o: libskein_threefish.c libskein_threefish.h
-	$(CXX) $(CFLAGS) -c -o libskein_threefish.o libskein_threefish.c
+libskein_threefish.o: libskein_threefish.cc libskein_threefish.h
+	$(CXX) $(CFLAGS) -c -o libskein_threefish.o libskein_threefish.cc
 
-libskein_ubi.o:	libskein_ubi.c libskein_ubi.h
-	$(CXX) $(CFLAGS) -c -o libskein_ubi.o libskein_ubi.c
+libskein_ubi.o:	libskein_ubi.cc libskein_ubi.h
+	$(CXX) $(CFLAGS) -c -o libskein_ubi.o libskein_ubi.cc
 
 clean:
 	rm -f *.o libskein.so

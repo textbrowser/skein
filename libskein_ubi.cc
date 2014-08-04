@@ -25,9 +25,12 @@
 ** SKEIN, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+extern "C"
+{
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+}
 
 #include "libskein_ubi.h"
 
@@ -56,7 +59,7 @@ char *libskein_ubi(const char *G,
   if(!G || G_size <= 0 || !M || M_size <= 0 || !T || bit_count <= 0)
     return ubi;
 
-  H = (char *) malloc(G_size);
+  H = new(std::nothrow) char[G_size];
 
   if(!H)
     goto done;
