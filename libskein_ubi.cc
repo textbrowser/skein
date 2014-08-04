@@ -32,6 +32,7 @@ extern "C"
 #include <string.h>
 }
 
+#include <new>
 #include "libskein_ubi.h"
 
 char *libskein_ubi(const char *G,
@@ -59,14 +60,14 @@ char *libskein_ubi(const char *G,
   if(!G || G_size <= 0 || !M || M_size <= 0 || !T || bit_count <= 0)
     return ubi;
 
-  H = new(std::nothrow) char[G_size];
+  H = new (std::nothrow) char[G_size];
 
   if(!H)
     goto done;
   else
     memcpy(H, G, G_size);
 
-  Mp = (char *) malloc(M_size);
+  Mp = new (std::nothrow) char[M_size];
 
   if(!Mp)
     goto done;
@@ -90,7 +91,11 @@ char *libskein_ubi(const char *G,
   else
     p = NM % Nb;
 
-  Mpp = (char *) malloc(NM + p);
+  Mpp = new (std::nothrow) char[NM + p];
+
+  if(!Mpp)
+    goto done;
+
   memset(Mpp, 0, NM + p);
   memcpy(Mpp, Mp, NM);
   k = (NM + p) / Nb;
