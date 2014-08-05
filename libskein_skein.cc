@@ -25,9 +25,6 @@
 ** SKEIN, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <algorithm>
-#include <new>
-
 #include "libskein_skein.h"
 
 static const short UBI_TYPE_KEY = 0;

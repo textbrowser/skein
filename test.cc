@@ -1,8 +1,9 @@
+extern "C"
+{
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+}
 
-#include "libskein_threefish.h"
+#include "libskein_skein.h"
 
 static void test1(void)
 {

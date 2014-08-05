@@ -27,6 +27,10 @@
 
 #ifndef LIBSKEIN_SKEIN_H
 #define LIBSKEIN_SKEIN_H
+
+#include <algorithm>
+#include <new>
+
 #ifdef __cplusplus
 extern "C"
 {
