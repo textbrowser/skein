@@ -25,8 +25,19 @@
 ** SKEIN, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "libskein_threefish.h"
+#include <algorithm>
+#include <new>
 
+#include "libskein_skein.h"
+
+static const short UBI_TYPE_KEY = 0;
+static const short UBI_TYPE_CFG = 4;
+static const short UBI_TYPE_PRS = 8;
+static const short UBI_TYPE_PK = 12;
+static const short UBI_TYPE_KDF = 16;
+static const short UBI_TYPE_NON = 20;
+static const short UBI_TYPE_MSG = 48;
+static const short UBI_TYPE_OUT = 63;
 static size_t Nr = 0;
 static size_t Nw = 0;
 static uint8_t *Pi = 0;
@@ -62,6 +73,126 @@ static void purge(void *buffer, const size_t buffer_size);
 static void wordsToBytes(char *B,
 			 const uint64_t *words,
 			 const size_t words_size);
+
+uint64_t *libskein_ubi(const uint64_t *G,
+		       const size_t G_size,
+		       const char *M,
+		       const size_t M_size,
+		       const short Type,
+		       const size_t Nb,
+		       const size_t bit_count)
+{
+  /*
+  ** Section 3.4.
+  */
+
+  char *Mp = 0;
+  libskein_tweak T(Type);
+  size_t NM = 0;
+  size_t i = 0;
+  size_t j = 0;
+  size_t k = 0;
+  size_t p = 0;
+  uint16_t B = 0;
+  uint64_t *H = 0;
+  uint64_t *Mi = 0;
+  uint64_t *Mpp = 0;
+  uint64_t *ubi = 0;
+
+  if(!G || G_size <= 0 || !M || M_size <= 0 || bit_count <= 0)
+    return ubi;
+
+  H = new (std::nothrow) uint64_t[G_size];
+
+  if(!H)
+    goto done;
+  else
+    memcpy(H, G, G_size);
+
+  Mi = new (std::nothrow) uint64_t[Nb];
+
+  if(!Mi)
+    goto done;
+
+  Mp = new (std::nothrow) char[M_size];
+
+  if(!Mp)
+    goto done;
+  else
+    memcpy(Mp, M, M_size);
+
+  if((bit_count & 7) != 0)
+    {
+      B = 1;
+      Mp[M_size - 1] = (char) (1 << (7 - (bit_count & 7)));
+    }
+  else
+    B = 0;
+
+  NM = M_size;
+
+  if(NM == 0)
+    p = Nb;
+  else if(NM < Nb)
+    p = Nb - NM;
+  else
+    p = NM % Nb;
+
+  Mpp = new (std::nothrow) uint64_t[NM + p]; /*
+					     ** Number of bytes in M' plus
+					     ** p.
+					     */
+
+  if(!Mpp)
+    goto done;
+
+  memset(Mpp, 0, NM + p);
+  memcpy(Mpp, Mp, NM);
+  k = (NM + p) / Nb;
+
+  for(i = 0; i < k; i++)
+    {
+      T.setPosition((uint64_t) std::min(NM, (i + 1) * Nb));
+
+      for(j = 0; j < Nb; j++)
+	Mi[j] = Mpp[j + i * Nb];
+    }
+
+ done:
+  delete []H;
+  delete []Mi;
+  delete []Mp;
+  delete []Mpp;
+  return ubi;
+}
+
+static void bytesToWords(uint64_t *W,
+			 const char *bytes,
+			 const size_t bytes_size)
+{
+  if(!W || !bytes || bytes_size <= 0)
+    return;
+
+  size_t i = 0;
+
+  for(i = 0; i < bytes_size / 8; i++)
+    {
+      char b[8];
+      size_t j = 0;
+
+      for(j = 0; j < 8; j++)
+	b[j] = bytes[i * 8 + j];
+
+      W[i] = (uint64_t) b[0] |
+	((uint64_t) b[1] << 8) |
+	((uint64_t) b[2] << 16) |
+	((uint64_t) b[3] << 24) |
+	((uint64_t) b[4] << 32) |
+	((uint64_t) b[5] << 40) |
+	((uint64_t) b[6] << 48) |
+	((uint64_t) b[7] << 56);
+    }
+}
 
 static void mix(const uint64_t x0,
 		const uint64_t x1,
@@ -132,9 +263,9 @@ static void threefish_E(char *E,
   uint64_t t[3];
   uint64_t v[Nw];
 
-  libskein_bytesToWords(k, K, (size_t) block_size / 8);
-  libskein_bytesToWords(p, P, (size_t) block_size / 8);
-  libskein_bytesToWords(t, T, (size_t) 16);
+  bytesToWords(k, K, (size_t) block_size / 8);
+  bytesToWords(p, P, (size_t) block_size / 8);
+  bytesToWords(t, T, (size_t) 16);
 
   for(i = 0; i < Nw; i++)
     kNw ^= k[i]; // Section 3.3.2.

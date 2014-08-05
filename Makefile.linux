@@ -3,21 +3,13 @@ CXXFLAGS = -fPIC -Wall -Wconversion -Werror -Wextra \
 	   -Wstrict-overflow=5
 
 CXX = g++
-OBJECT_FILES = libskein_threefish.o \
-	       libskein_ubi.o \
-               libskein_utils.o
+OBJECT_FILES = libskein_skein.o
 
 all:	library $(OBJECT_FILES)
 	$(CXX) $(CXXFLAGS) test.cc -o test -L. -lskein -Wl,-rpath,.
 
-libskein_threefish.o: libskein_threefish.cc libskein_threefish.h
-	$(CXX) $(CXXFLAGS) -c -o libskein_threefish.o libskein_threefish.cc
-
-libskein_ubi.o:	libskein_ubi.cc libskein_ubi.h
-	$(CXX) $(CXXFLAGS) -c -o libskein_ubi.o libskein_ubi.cc
-
-libskein_utils.o: libskein_utils.cc libskein_utils.h
-	$(CXX) $(CXXFLAGS) -c -o libskein_utils.o libskein_utils.cc
+libskein_threefish.o: libskein_skein.cc libskein_skein.h
+	$(CXX) $(CXXFLAGS) -c -o libskein_skein.o libskein_skein.cc
 
 clean:
 	rm -f *.o libskein.so

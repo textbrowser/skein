@@ -25,6 +25,13 @@
 ** SKEIN, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#ifndef LIBSKEIN_SKEIN_H
+#define LIBSKEIN_SKEIN_H
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 extern "C"
 {
 #include <stdint.h>
@@ -32,108 +39,73 @@ extern "C"
 #include <string.h>
 }
 
-#include <algorithm>
-#include <new>
-
-#include "libskein_ubi.h"
-
-static const short UBI_TYPE_KEY = 0;
-static const short UBI_TYPE_CFG = 4;
-static const short UBI_TYPE_PRS = 8;
-static const short UBI_TYPE_PK = 12;
-static const short UBI_TYPE_KDF = 16;
-static const short UBI_TYPE_NON = 20;
-static const short UBI_TYPE_MSG = 48;
-static const short UBI_TYPE_OUT = 63;
-
 uint64_t *libskein_ubi(const uint64_t *G,
 		       const size_t G_size,
 		       const char *M,
 		       const size_t M_size,
 		       const short Type,
 		       const size_t Nb,
-		       const size_t bit_count)
+		       const size_t bit_count);
+void libskein_bytesToWords(uint64_t *W,
+			   const char *bytes,
+			   const size_t bytes_size);
+void libskein_threefish(char *E,
+			const char *K,
+			const char *T,
+			const char *P,
+			const size_t block_size);
+
+class libskein_tweak
 {
   /*
-  ** Section 3.4.
+  **  Please refer to section 3.4 of the official document.
   */
 
-  char *Mp = 0;
-  libskein_tweak T(Type);
-  size_t NM = 0;
-  size_t i = 0;
-  size_t j = 0;
-  size_t k = 0;
-  size_t p = 0;
-  uint16_t B = 0;
-  uint64_t *H = 0;
-  uint64_t *Mi = 0;
-  uint64_t *Mpp = 0;
-  uint64_t *ubi = 0;
+ public:
+  libskein_tweak(const short type)
+  {
+    m_t[0] = 0ULL; // Position.
+    m_t[1] = ((uint64_t) type) << 56; /*
+				      ** Type.
+				      ** 56 = 120 - 64.
+				      */
+    m_type = type;
+  }
 
-  if(!G || G_size <= 0 || !M || M_size <= 0 || bit_count <= 0)
-    return ubi;
+  bool isFirst(void) const
+  {
+    return m_t[1] & (1ULL << 62); // 62 = 126 - 64.
+  }
 
-  H = new (std::nothrow) uint64_t[G_size];
+  bool isLast(void) const
+  {
+    return m_t[1] & (1ULL << 63); // 63 = 127 - 64.
+  }
 
-  if(!H)
-    goto done;
-  else
-    memcpy(H, G, G_size);
+  bool isPadded(void) const
+  {
+    return m_t[1] & (1ULL << 55); // 55 = 119 - 64.
+  }
 
-  Mi = new (std::nothrow) uint64_t[Nb];
+  void setPadded(const bool padded)
+  {
+    if(padded)
+      m_t[1] |= (1ULL << 55); // 55 = 119 - 64.
+    else
+      m_t[1] &= ~(1ULL << 55); // 55 = 119 - 64.
+  }
 
-  if(!Mi)
-    goto done;
+  void setPosition(const uint64_t position)
+  {
+    m_t[0] = position;
+  }
 
-  Mp = new (std::nothrow) char[M_size];
+ private:
+  short m_type;
+  uint64_t m_t[2];
+};
 
-  if(!Mp)
-    goto done;
-  else
-    memcpy(Mp, M, M_size);
-
-  if((bit_count & 7) != 0)
-    {
-      B = 1;
-      Mp[M_size - 1] = (char) (1 << (7 - (bit_count & 7)));
-    }
-  else
-    B = 0;
-
-  NM = M_size;
-
-  if(NM == 0)
-    p = Nb;
-  else if(NM < Nb)
-    p = Nb - NM;
-  else
-    p = NM % Nb;
-
-  Mpp = new (std::nothrow) uint64_t[NM + p]; /*
-					     ** Number of bytes in M' plus
-					     ** p.
-					     */
-
-  if(!Mpp)
-    goto done;
-
-  memset(Mpp, 0, NM + p);
-  memcpy(Mpp, Mp, NM);
-  k = (NM + p) / Nb;
-
-  for(i = 0; i < k; i++)
-    {
-      T.setPosition((uint64_t) std::min(NM, (i + 1) * Nb));
-
-      for(j = 0; j < Nb; j++)
-	Mi[j] = Mpp[j + i * Nb];
-    }
-
- done:
-  delete []H;
-  delete []Mi;
-  delete []Mp;
-  delete []Mpp;
-  return ubi;
+#ifdef __cplusplus
 }
+#endif
+#endif
