@@ -35,37 +35,37 @@ static const short UBI_TYPE_KDF = 16;
 static const short UBI_TYPE_NON = 20;
 static const short UBI_TYPE_MSG = 48;
 static const short UBI_TYPE_OUT = 63;
+static const uint8_t *Pi = 0;
+static const uint8_t Pi_4[4] = {0, 3, 2, 1};
+static const uint8_t Pi_8[8] = {2, 1, 4, 7, 6, 5, 0, 3};
+static const uint8_t Pi_16[16] = {0, 9, 2, 13, 6, 11, 4, 15,
+				  10, 7, 12, 3, 14, 5, 8, 1};
+static const uint8_t R_4[8][2] = {{14, 16},
+				  {52, 57},
+				  {23, 40},
+				  {5, 37},
+				  {25, 33},
+				  {46, 12},
+				  {58, 22},
+				  {32, 32}};
+static const uint8_t R_8[8][4] = {{46, 36, 19, 37},
+				  {33, 27, 14, 42},
+				  {17, 49, 36, 39},
+				  {44, 9, 54, 56},
+				  {39, 30, 34, 24},
+				  {13, 50, 10, 17},
+				  {25, 29, 39, 43},
+				  {8, 35, 56, 22}};
+static const uint8_t R_16[8][8] = {{24, 13, 8, 47, 8, 17, 22, 37},
+				   {38, 19, 10, 55, 49, 18, 23, 52},
+				   {33, 4, 51, 13, 34, 41, 59, 17},
+				   {5, 20, 48, 41, 47, 28, 16, 25},
+				   {41, 9, 37, 31, 12, 47, 44, 30},
+				   {16, 34, 56, 51, 4, 53, 42, 41},
+				   {31, 44, 47, 46, 19, 42, 44, 25},
+				   {9, 48, 35, 52, 23, 31, 37, 20}};
 static size_t Nr = 0;
 static size_t Nw = 0;
-static uint8_t *Pi = 0;
-static uint8_t Pi_4[4] = {0, 3, 2, 1};
-static uint8_t Pi_8[8] = {2, 1, 4, 7, 6, 5, 0, 3};
-static uint8_t Pi_16[16] = {0, 9, 2, 13, 6, 11, 4, 15,
-			    10, 7, 12, 3, 14, 5, 8, 1};
-static uint8_t R_4[8][2] = {{14, 16},
-			    {52, 57},
-			    {23, 40},
-			    {5, 37},
-			    {25, 33},
-			    {46, 12},
-			    {58, 22},
-			    {32, 32}};
-static uint8_t R_8[8][4] = {{46, 36, 19, 37},
-			    {33, 27, 14, 42},
-			    {17, 49, 36, 39},
-			    {44, 9, 54, 56},
-			    {39, 30, 34, 24},
-			    {13, 50, 10, 17},
-			    {25, 29, 39, 43},
-			    {8, 35, 56, 22}};
-static uint8_t R_16[8][8] = {{24, 13, 8, 47, 8, 17, 22, 37},
-			     {38, 19, 10, 55, 49, 18, 23, 52},
-			     {33, 4, 51, 13, 34, 41, 59, 17},
-			     {5, 20, 48, 41, 47, 28, 16, 25},
-			     {41, 9, 37, 31, 12, 47, 44, 30},
-			     {16, 34, 56, 51, 4, 53, 42, 41},
-			     {31, 44, 47, 46, 19, 42, 44, 25},
-			     {9, 48, 35, 52, 23, 31, 37, 20}};
 static void purge(void *buffer, const size_t buffer_size);
 static void wordsToBytes(char *B,
 			 const uint64_t *words,
@@ -146,6 +146,7 @@ uint64_t *libskein_ubi(const uint64_t *G,
   memset(Mpp, 0, NM + p);
   memcpy(Mpp, Mp, NM);
   k = (NM + p) / Nb;
+  (void) B;
 
   for(i = 0; i < k; i++)
     {
@@ -248,6 +249,9 @@ static void threefish_E(char *E,
   ** Section 3.3.
   */
 
+  if(!E || !K || !T || !P || block_size <= 0)
+    return;
+
   size_t d = 0;
   size_t i = 0;
   size_t j = 0;
@@ -335,6 +339,9 @@ static void wordsToBytes(char *B,
 			 const uint64_t *words,
 			 const size_t words_size)
 {
+  if(!B || !words)
+    return;
+
   size_t i = 0;
 
   for(i = 0; i < words_size; i++)
