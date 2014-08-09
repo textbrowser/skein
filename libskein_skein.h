@@ -28,6 +28,13 @@
 #ifndef LIBSKEIN_SKEIN_H
 #define LIBSKEIN_SKEIN_H
 
+extern "C"
+{
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+}
+
 #include <algorithm>
 #include <new>
 
@@ -36,13 +43,6 @@ extern "C"
 {
 #endif
 
-extern "C"
-{
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-}
-
 uint64_t *libskein_ubi(const uint64_t *G,
 		       const size_t G_size,
 		       const char *M,
@@ -50,9 +50,6 @@ uint64_t *libskein_ubi(const uint64_t *G,
 		       const short Type,
 		       const size_t Nb,
 		       const size_t bit_count);
-void libskein_bytesToWords(uint64_t *W,
-			   const char *bytes,
-			   const size_t bytes_size);
 void libskein_threefish(char *E,
 			const char *K,
 			const char *T,
