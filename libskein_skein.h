@@ -48,8 +48,7 @@ uint64_t *libskein_ubi(const uint64_t *G,
 		       const char *M,
 		       const size_t M_size,
 		       const short Type,
-		       const size_t Nb,
-		       const size_t bit_count);
+		       const size_t Nb);
 void libskein_threefish(char *E,
 			const char *K,
 			const char *T,

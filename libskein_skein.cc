@@ -76,8 +76,7 @@ uint64_t *libskein_ubi(const uint64_t *G,
 		       const char *M,
 		       const size_t M_size,
 		       const short Type,
-		       const size_t Nb,
-		       const size_t bit_count)
+		       const size_t Nb)
 {
   /*
   ** Section 3.4.
@@ -86,6 +85,7 @@ uint64_t *libskein_ubi(const uint64_t *G,
   char *Mp = 0;
   libskein_tweak T(Type);
   size_t NM = 0;
+  size_t bit_count = 8 * M_size;
   size_t i = 0;
   size_t j = 0;
   size_t k = 0;
@@ -228,22 +228,20 @@ static void purge(void *buffer,
     return;
 
   char *b = (char *) buffer;
-  size_t bs = buffer_size;
+  size_t i = 0;
 
-  do
+  for(i = 0; i < buffer_size; i++)
     {
       *b = 0;
       b += 1;
-      bs -= 1;
     }
-  while(bs > 0);
 }
 
-static void threefish_E(char *E,
-			const char *K,
-			const char *T,
-			const char *P,
-			const size_t block_size)
+static void threefish(char *E,
+		      const char *K,
+		      const char *T,
+		      const char *P,
+		      const size_t block_size)
 {
   /*
   ** Section 3.3.
@@ -387,5 +385,5 @@ void libskein_threefish(char *E,
   else
     return;
 
-  threefish_E(E, K, T, P, block_size);
+  threefish(E, K, T, P, block_size);
 }
