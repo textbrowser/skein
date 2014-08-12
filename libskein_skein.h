@@ -13,7 +13,7 @@
 ** 3. The name of the author may not be used to endorse or promote products
 **    derived from skein without specific prior written permission.
 **
-** SKEIN IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+** LIBSKEIN IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
 ** IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 ** OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
 ** IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -22,7 +22,7 @@
 ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-** SKEIN, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+** LIBSKEIN, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #ifndef LIBSKEIN_SKEIN_H
@@ -43,12 +43,6 @@ extern "C"
 {
 #endif
 
-uint64_t *libskein_ubi(const uint64_t *G,
-		       const size_t G_size,
-		       const char *M,
-		       const size_t M_size,
-		       const short Type,
-		       const size_t Nb);
 void libskein_threefish(char *E,
 			const char *K,
 			const char *T,
@@ -84,12 +78,28 @@ class libskein_tweak
     return m_t[1] & (1ULL << 55); // 55 = 119 - 64.
   }
 
+  void setFirst(const bool first)
+  {
+    if(first)
+      m_t[1] |= (1ULL << 62); // 62 = 126 - 64.
+    else
+      m_t[1] &= ~(1ULL < 62);
+  }
+
+  void setLast(const bool last)
+  {
+    if(last)
+      m_t[1] |= (1ULL << 63); // 63 = 127 - 64.
+    else
+      m_t[1] &= ~(1ULL < 63);
+  }
+
   void setPadded(const bool padded)
   {
     if(padded)
       m_t[1] |= (1ULL << 55); // 55 = 119 - 64.
     else
-      m_t[1] &= ~(1ULL << 55); // 55 = 119 - 64.
+      m_t[1] &= ~(1ULL << 55);
   }
 
   void setPosition(const uint64_t position)

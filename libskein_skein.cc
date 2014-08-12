@@ -13,7 +13,7 @@
 ** 3. The name of the author may not be used to endorse or promote products
 **    derived from skein without specific prior written permission.
 **
-** SKEIN IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+** LIBSKEIN IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
 ** IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 ** OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
 ** IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -22,7 +22,7 @@
 ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-** SKEIN, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+** LIBSKEIN, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "libskein_skein.h"
@@ -66,38 +66,39 @@ static const uint8_t R_16[8][8] = {{24, 13, 8, 47, 8, 17, 22, 37},
 				   {9, 48, 35, 52, 23, 31, 37, 20}};
 static size_t Nr = 0;
 static size_t Nw = 0;
+static void bytesToWords(uint64_t *W,
+			 const char *bytes,
+			 const size_t bytes_size);
 static void purge(void *buffer, const size_t buffer_size);
 static void wordsToBytes(char *B,
 			 const uint64_t *words,
 			 const size_t words_size);
 
-uint64_t *libskein_ubi(const uint64_t *G,
-		       const size_t G_size,
-		       const char *M,
-		       const size_t M_size,
-		       const short Type,
-		       const size_t Nb)
+static uint64_t *ubi(const uint64_t *G,
+		     const size_t G_size,
+		     const char *M,
+		     const size_t M_size,
+		     const short Type,
+		     const size_t Nb)
 {
+  if(!G || G_size <= 0 || !M || M_size <= 0 || Nb <= 0)
+    return 0;
+
   /*
   ** Section 3.4.
   */
 
   char *Mp = 0;
   libskein_tweak T(Type);
-  size_t NM = 0;
+  size_t NM = M_size;
   size_t bit_count = 8 * M_size;
   size_t i = 0;
   size_t j = 0;
-  size_t k = 0;
-  size_t p = 0;
+  size_t k = std::max(static_cast<size_t> (1), (NM + Nb - 1) / Nb);
   uint16_t B = 0;
   uint64_t *H = 0;
   uint64_t *Mi = 0;
   uint64_t *Mpp = 0;
-  uint64_t *ubi = 0;
-
-  if(!G || G_size <= 0 || !M || M_size <= 0 || bit_count <= 0)
-    return ubi;
 
   H = new (std::nothrow) uint64_t[G_size];
 
@@ -106,7 +107,7 @@ uint64_t *libskein_ubi(const uint64_t *G,
   else
     memcpy(H, G, G_size);
 
-  Mi = new (std::nothrow) uint64_t[Nb];
+  Mi = new (std::nothrow) uint64_t[Nb / 8];
 
   if(!Mi)
     goto done;
@@ -121,39 +122,34 @@ uint64_t *libskein_ubi(const uint64_t *G,
   if((bit_count & 7) != 0)
     {
       B = 1;
-      Mp[M_size - 1] = (char) (1 << (7 - (bit_count & 7)));
+      Mp[M_size - 1] = static_cast<char> ((1 << (7 - (bit_count & 7))));
     }
   else
     B = 0;
 
-  NM = M_size;
-
-  if(NM == 0)
-    p = Nb;
-  else if(NM < Nb)
-    p = Nb - NM;
-  else
-    p = NM % Nb;
-
-  Mpp = new (std::nothrow) uint64_t[NM + p]; /*
-					     ** Number of bytes in M' plus
-					     ** p.
-					     */
+  Mpp = new (std::nothrow) uint64_t[k * Nb / 8];
 
   if(!Mpp)
     goto done;
 
-  memset(Mpp, 0, NM + p);
-  memcpy(Mpp, Mp, NM);
-  k = (NM + p) / Nb;
-  (void) B;
+  bytesToWords(Mpp, Mp, M_size);
 
   for(i = 0; i < k; i++)
     {
-      T.setPosition((uint64_t) std::min(NM, (i + 1) * Nb));
+      T.setPosition(std::min(NM, (i + 1) * Nb));
 
-      for(j = 0; j < Nb; j++)
-	Mi[j] = Mpp[j + i * Nb];
+      if(i == 0)
+	T.setFirst(true);
+      else
+	T.setFirst(false);
+
+      if(i == k - 1)
+	T.setLast(true);
+      else
+	T.setLast(false);
+
+      for(j = 0; j < Nb / 8; j++)
+	Mi[j] = Mpp[j + i * Nb / 8];
     }
 
  done:
@@ -161,7 +157,7 @@ uint64_t *libskein_ubi(const uint64_t *G,
   delete []Mi;
   delete []Mp;
   delete []Mpp;
-  return ubi;
+  return H;
 }
 
 static void bytesToWords(uint64_t *W,
@@ -181,14 +177,14 @@ static void bytesToWords(uint64_t *W,
       for(j = 0; j < 8; j++)
 	b[j] = bytes[i * 8 + j];
 
-      W[i] = (uint64_t) b[0] |
-	((uint64_t) b[1] << 8) |
-	((uint64_t) b[2] << 16) |
-	((uint64_t) b[3] << 24) |
-	((uint64_t) b[4] << 32) |
-	((uint64_t) b[5] << 40) |
-	((uint64_t) b[6] << 48) |
-	((uint64_t) b[7] << 56);
+      W[i] = static_cast<uint64_t> (b[0]) |
+	(static_cast<uint64_t> (b[1]) << 8) |
+	(static_cast<uint64_t> (b[2]) << 16) |
+	(static_cast<uint64_t> (b[3]) << 24) |
+	(static_cast<uint64_t> (b[4]) << 32) |
+	(static_cast<uint64_t> (b[5]) << 40) |
+	(static_cast<uint64_t> (b[6]) << 48) |
+	(static_cast<uint64_t> (b[7]) << 56);
     }
 }
 
@@ -227,7 +223,7 @@ static void purge(void *buffer,
   if(!buffer || buffer_size <= 0)
     return;
 
-  char *b = (char *) buffer;
+  char *b = static_cast<char *> (buffer);
   size_t i = 0;
 
   for(i = 0; i < buffer_size; i++)
@@ -243,12 +239,12 @@ static void threefish(char *E,
 		      const char *P,
 		      const size_t block_size)
 {
+  if(!E || !K || !T || !P || block_size <= 0)
+    return;
+
   /*
   ** Section 3.3.
   */
-
-  if(!E || !K || !T || !P || block_size <= 0)
-    return;
 
   size_t d = 0;
   size_t i = 0;
@@ -262,9 +258,9 @@ static void threefish(char *E,
   uint64_t t[3];
   uint64_t v[Nw];
 
-  bytesToWords(k, K, (size_t) block_size / 8);
-  bytesToWords(p, P, (size_t) block_size / 8);
-  bytesToWords(t, T, (size_t) 16);
+  bytesToWords(k, K, block_size / 8);
+  bytesToWords(p, P, block_size / 8);
+  bytesToWords(t, T, 16);
 
   for(i = 0; i < Nw; i++)
     kNw ^= k[i]; // Section 3.3.2.
@@ -344,14 +340,14 @@ static void wordsToBytes(char *B,
 
   for(i = 0; i < words_size; i++)
     {
-      B[i * 8 + 0] = (char) words[i];
-      B[i * 8 + 1] = (char) ((words[i] >> 8) & 0xff);
-      B[i * 8 + 2] = (char) ((words[i] >> 16) & 0xff);
-      B[i * 8 + 3] = (char) ((words[i] >> 24) & 0xff);
-      B[i * 8 + 4] = (char) ((words[i] >> 32) & 0xff);
-      B[i * 8 + 5] = (char) ((words[i] >> 40) & 0xff);
-      B[i * 8 + 6] = (char) ((words[i] >> 48) & 0xff);
-      B[i * 8 + 7] = (char) ((words[i] >> 56) & 0xff);
+      B[i * 8 + 0] = static_cast<char> (words[i]);
+      B[i * 8 + 1] = static_cast<char> ((words[i] >> 8) & 0xff);
+      B[i * 8 + 2] = static_cast<char> ((words[i] >> 16) & 0xff);
+      B[i * 8 + 3] = static_cast<char> ((words[i] >> 24) & 0xff);
+      B[i * 8 + 4] = static_cast<char> ((words[i] >> 32) & 0xff);
+      B[i * 8 + 5] = static_cast<char> ((words[i] >> 40) & 0xff);
+      B[i * 8 + 6] = static_cast<char> ((words[i] >> 48) & 0xff);
+      B[i * 8 + 7] = static_cast<char> ((words[i] >> 56) & 0xff);
     }
 }
 
@@ -363,6 +359,8 @@ void libskein_threefish(char *E,
 {
   if(!E || !K || !P || !T || block_size <= 0)
     return;
+
+  ubi(0, 0, 0, 0, 0, 0);
 
   if(block_size == 256)
     {
