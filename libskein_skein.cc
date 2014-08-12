@@ -153,7 +153,6 @@ static uint64_t *ubi(const uint64_t *G,
     }
 
  done:
-  delete []H;
   delete []Mi;
   delete []Mp;
   delete []Mpp;
