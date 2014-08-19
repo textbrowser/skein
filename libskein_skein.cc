@@ -389,7 +389,7 @@ void libskein_simplehash(char *H,
   memcpy(&C[8], &No, 8);
   memset(K_p, 0, Nb);
   G0 = ubi(K_p, Nb, C, sizeof(C), UBI_TYPE_CFG, Nb, block_size);
-  G1 = ubi(G1, Nb, M, M_size, UBI_TYPE_MSG, Nb, block_size);
+  G1 = ubi(G0, Nb, M, M_size, UBI_TYPE_MSG, Nb, block_size);
   delete []G0;
   delete []G1;
 }
