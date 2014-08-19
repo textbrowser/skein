@@ -373,6 +373,10 @@ void libskein_simplehash(char *H,
   if(!(Nb == 32 || Nb == 64 || Nb == 128))
     return;
 
+  /*
+  ** Section 3.5.4.
+  */
+
   ubi(0, 0, 0, 0, 0, 0, 0);
 }
 
