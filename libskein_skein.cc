@@ -79,7 +79,8 @@ static uint64_t *ubi(const uint64_t *G,
 		     const char *M,
 		     const size_t M_size,
 		     const short Type,
-		     const size_t Nb)
+		     const size_t Nb,
+		     const size_t block_size)
 {
   if(!G || G_size <= 0 || !M || M_size <= 0 || Nb <= 0)
     return 0;
@@ -89,11 +90,9 @@ static uint64_t *ubi(const uint64_t *G,
   */
 
   char *Mp = 0;
-  libskein_tweak T(Type);
+  libskein_tweak Tweak(Type);
   size_t NM = M_size;
   size_t bit_count = 8 * M_size;
-  size_t i = 0;
-  size_t j = 0;
   size_t k = std::max(static_cast<size_t> (1), (NM + Nb - 1) / Nb);
   uint16_t B = 0;
   uint64_t *H = 0;
@@ -134,22 +133,43 @@ static uint64_t *ubi(const uint64_t *G,
 
   bytesToWords(Mpp, Mp, M_size);
 
-  for(i = 0; i < k; i++)
+  for(size_t i = 0; i < k; i++)
     {
-      T.setPosition(std::min(NM, (i + 1) * Nb));
+      Tweak.setPosition(std::min(NM, (i + 1) * Nb));
 
       if(i == 0)
-	T.setFirst(true);
+	Tweak.setFirst(true);
       else
-	T.setFirst(false);
+	Tweak.setFirst(false);
 
       if(i == k - 1)
-	T.setLast(true);
+	Tweak.setLast(true);
       else
-	T.setLast(false);
+	Tweak.setLast(false);
 
-      for(j = 0; j < Nb / 8; j++)
+      if(Tweak.isLast())
+	{
+	  if(B == 0)
+	    Tweak.setPadded(false);
+	  else
+	    Tweak.setPadded(true);
+	}
+
+      for(size_t j = 0; j < Nb / 8; j++)
 	Mi[j] = Mpp[j + i * Nb / 8];
+
+      char E[G_size];
+      char K[G_size];
+      char P[Nb];
+      char T[16];
+
+      wordsToBytes(K, H, G_size);
+      wordsToBytes(P, Mi, Nb / 8);
+      wordsToBytes(T, Tweak.value(), 2);
+      libskein_threefish(E, K, T, P, block_size);
+
+      for(size_t j = 0; j < Nb / 8; j++)
+	H[j] = Mi[j] ^ Mpp[j + i * Nb / 8];
     }
 
  done:
@@ -166,14 +186,11 @@ static void bytesToWords(uint64_t *W,
   if(!W || !bytes || bytes_size <= 0)
     return;
 
-  size_t i = 0;
-
-  for(i = 0; i < bytes_size / 8; i++)
+  for(size_t i = 0; i < bytes_size / 8; i++)
     {
       char b[8];
-      size_t j = 0;
 
-      for(j = 0; j < 8; j++)
+      for(size_t j = 0; j < 8; j++)
 	b[j] = bytes[i * 8 + j];
 
       W[i] = static_cast<uint64_t> (b[0]) |
@@ -223,9 +240,8 @@ static void purge(void *buffer,
     return;
 
   char *b = static_cast<char *> (buffer);
-  size_t i = 0;
 
-  for(i = 0; i < buffer_size; i++)
+  for(size_t i = 0; i < buffer_size; i++)
     {
       *b = 0;
       b += 1;
@@ -245,9 +261,6 @@ static void threefish(char *E,
   ** Section 3.3.
   */
 
-  size_t d = 0;
-  size_t i = 0;
-  size_t j = 0;
   uint64_t C240 = 0x1bd11bdaa9fc1a22;
   uint64_t c[Nw];
   uint64_t k[Nw + 1];
@@ -261,12 +274,12 @@ static void threefish(char *E,
   bytesToWords(p, P, block_size / 8);
   bytesToWords(t, T, 16);
 
-  for(i = 0; i < Nw; i++)
+  for(size_t i = 0; i < Nw; i++)
     kNw ^= k[i]; // Section 3.3.2.
 
   k[Nw] = kNw;
 
-  for(i = 0; i < Nw; i++)
+  for(size_t i = 0; i < Nw; i++)
     v[i] = p[i];
 
   t[2] = t[0] ^ t[1]; // Section 3.3.2.
@@ -275,8 +288,8 @@ static void threefish(char *E,
   ** Prepare the key schedule, section 3.3.2.
   */
 
-  for(d = 0; d < Nr / 4 + 1; d++) // d rounds.
-    for(i = 0; i < Nw; i++)
+  for(size_t d = 0; d < Nr / 4 + 1; d++) // d rounds.
+    for(size_t i = 0; i < Nw; i++)
       {	
 	s[d][i] = k[(d + i) % (Nw + 1)];
 
@@ -288,16 +301,16 @@ static void threefish(char *E,
 	  s[d][i] += t[d % 3];
       }
 
-  for(d = 0; d < Nr; d++) // d rounds.
+  for(size_t d = 0; d < Nr; d++) // d rounds.
     {
       uint64_t e[Nw];
 
-      for(i = 0; i < Nw; i++)
+      for(size_t i = 0; i < Nw; i++)
 	e[i] = (d % 4 == 0) ? v[i] + s[d / 4][i] : v[i];
 
       uint64_t f[Nw];
 
-      for(j = 0; j < Nw / 2; j++)
+      for(size_t j = 0; j < Nw / 2; j++)
 	{
 	  uint64_t x0 = e[j * 2];
 	  uint64_t x1 = e[j * 2 + 1];
@@ -309,14 +322,14 @@ static void threefish(char *E,
 	  f[j * 2 + 1] = y1;
 	}
 
-      for(i = 0; i < Nw; i++)
+      for(size_t i = 0; i < Nw; i++)
 	v[i] = f[Pi[i]];
 
       purge(e, sizeof(e));
       purge(t, sizeof(t));
     }
 
-  for(i = 0; i < Nw; i++)
+  for(size_t i = 0; i < Nw; i++)
     c[i] = v[i] + s[Nr / 4][i];
 
   wordsToBytes(E, c, Nw);
@@ -335,9 +348,7 @@ static void wordsToBytes(char *B,
   if(!B || !words)
     return;
 
-  size_t i = 0;
-
-  for(i = 0; i < words_size; i++)
+  for(size_t i = 0; i < words_size; i++)
     {
       B[i * 8 + 0] = static_cast<char> (words[i]);
       B[i * 8 + 1] = static_cast<char> ((words[i] >> 8) & 0xff);
@@ -350,6 +361,21 @@ static void wordsToBytes(char *B,
     }
 }
 
+void libskein_simplehash(char *H,
+			 const size_t Nb,
+			 const char *M,
+			 const size_t M_size,
+			 const size_t block_size)
+{
+  if(!H || !M || M_size <= 0 || Nb <= 0 || block_size <= 0)
+    return;
+
+  if(!(Nb == 32 || Nb == 64 || Nb == 128))
+    return;
+
+  ubi(0, 0, 0, 0, 0, 0, 0);
+}
+
 void libskein_threefish(char *E,
 			const char *K,
 			const char *T,
@@ -358,8 +384,6 @@ void libskein_threefish(char *E,
 {
   if(!E || !K || !P || !T || block_size <= 0)
     return;
-
-  ubi(0, 0, 0, 0, 0, 0);
 
   if(block_size == 256)
     {

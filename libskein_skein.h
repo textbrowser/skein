@@ -43,6 +43,11 @@ extern "C"
 {
 #endif
 
+void libskein_simplehash(char *H,
+			 const size_t Nb,
+			 const char *M,
+			 const size_t M_size,
+			 const size_t block_size);
 void libskein_threefish(char *E,
 			const char *K,
 			const char *T,
@@ -59,7 +64,7 @@ class libskein_tweak
   libskein_tweak(const short type)
   {
     m_t[0] = 0ULL; // Position.
-    m_t[1] = ((uint64_t) type) << 56; // 56 = 120 - 64.
+    m_t[1] = (static_cast<uint64_t> (type)) << 56; // 56 = 120 - 64.
     m_type = type;
   }
 
@@ -76,6 +81,11 @@ class libskein_tweak
   bool isPadded(void) const
   {
     return m_t[1] & (1ULL << 55); // 55 = 119 - 64.
+  }
+
+  const uint64_t *value(void) const
+  {
+    return m_t;
   }
 
   void setFirst(const bool first)
