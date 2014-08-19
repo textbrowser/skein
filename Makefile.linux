@@ -1,4 +1,4 @@
-CXXFLAGS = -fPIC -Wall -Wconversion -Werror -Wextra \
+CXXFLAGS = -g -fPIC -Wall -Wconversion -Werror -Wextra \
 	   -Wformat=2 -Wpointer-arith \
 	   -Wstrict-overflow=5
 

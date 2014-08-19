@@ -75,14 +75,13 @@ static void wordsToBytes(char *B,
 			 const size_t words_size);
 
 static uint64_t *ubi(const uint64_t *G,
-		     const size_t G_size,
 		     const char *M,
 		     const size_t M_size,
 		     const short Type,
 		     const size_t Nb,
 		     const size_t block_size)
 {
-  if(!G || G_size <= 0 || !M || M_size <= 0 || Nb <= 0)
+  if(!G || !M || M_size <= 0 || Nb <= 0)
     return 0;
 
   /*
@@ -99,12 +98,12 @@ static uint64_t *ubi(const uint64_t *G,
   uint64_t *Mi = 0;
   uint64_t *Mpp = 0;
 
-  H = new (std::nothrow) uint64_t[G_size];
+  H = new (std::nothrow) uint64_t[Nb];
 
   if(!H)
     goto done;
   else
-    memcpy(H, G, G_size);
+    memcpy(H, G, Nb);
 
   Mi = new (std::nothrow) uint64_t[Nb / 8];
 
@@ -158,15 +157,16 @@ static uint64_t *ubi(const uint64_t *G,
       for(size_t j = 0; j < Nb / 8; j++)
 	Mi[j] = Mpp[j + i * Nb / 8];
 
-      char E[G_size];
-      char K[G_size];
+      char E[Nb];
+      char K[8 * Nb];
       char P[Nb];
       char T[16];
 
-      wordsToBytes(K, H, G_size);
+      wordsToBytes(K, H, Nb);
       wordsToBytes(P, Mi, Nb / 8);
       wordsToBytes(T, Tweak.value(), 2);
       libskein_threefish(E, K, T, P, block_size);
+      bytesToWords(Mi, E, Nb);
 
       for(size_t j = 0; j < Nb / 8; j++)
 	H[j] = Mi[j] ^ Mpp[j + i * Nb / 8];
@@ -388,8 +388,8 @@ void libskein_simplehash(char *H,
   C[4] = 1;
   memcpy(&C[8], &No, 8);
   memset(K_p, 0, Nb);
-  G0 = ubi(K_p, Nb, C, sizeof(C), UBI_TYPE_CFG, Nb, block_size);
-  G1 = ubi(G0, Nb, M, M_size, UBI_TYPE_MSG, Nb, block_size);
+  G0 = ubi(K_p, C, sizeof(C), UBI_TYPE_CFG, Nb, block_size);
+  G1 = ubi(G0, M, M_size, UBI_TYPE_MSG, Nb, block_size);
   delete []G0;
   delete []G1;
 }
