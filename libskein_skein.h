@@ -45,6 +45,7 @@ extern "C"
 
 void libskein_simplehash(char *H,
 			 const size_t Nb,
+			 const size_t No,
 			 const char *M,
 			 const size_t M_size,
 			 const size_t block_size);

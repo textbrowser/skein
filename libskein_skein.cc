@@ -363,21 +363,32 @@ static void wordsToBytes(char *B,
 
 void libskein_simplehash(char *H,
 			 const size_t Nb,
+			 const size_t No,
 			 const char *M,
 			 const size_t M_size,
 			 const size_t block_size)
 {
-  if(!H || !M || M_size <= 0 || Nb <= 0 || block_size <= 0)
+  if(!H || !M || M_size <= 0 || Nb <= 0 || No <= 0 || block_size <= 0)
     return;
 
   if(!(Nb == 32 || Nb == 64 || Nb == 128))
     return;
 
   /*
-  ** Section 3.5.4.
+  ** Section 3.5.
   */
 
-  ubi(0, 0, 0, 0, 0, 0, 0);
+  char C[32];
+  uint64_t *G0 = 0;
+  uint64_t *G1 = 0;
+  uint64_t K_p[Nb];
+
+  memset(C, 0, sizeof(C));
+  memcpy(C, "SHA3", 4);
+  G0 = ubi(K_p, Nb, C, 32, UBI_TYPE_CFG, Nb, block_size);
+  G1 = ubi(G1, Nb, M, M_size, UBI_TYPE_MSG, Nb, block_size);
+  delete []G0;
+  delete []G1;
 }
 
 void libskein_threefish(char *E,
