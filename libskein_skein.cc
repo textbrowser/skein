@@ -385,7 +385,10 @@ void libskein_simplehash(char *H,
 
   memset(C, 0, sizeof(C));
   memcpy(C, "SHA3", 4);
-  G0 = ubi(K_p, Nb, C, 32, UBI_TYPE_CFG, Nb, block_size);
+  C[4] = 1;
+  memcpy(&C[8], &No, 8);
+  memset(K_p, 0, Nb);
+  G0 = ubi(K_p, Nb, C, sizeof(C), UBI_TYPE_CFG, Nb, block_size);
   G1 = ubi(G1, Nb, M, M_size, UBI_TYPE_MSG, Nb, block_size);
   delete []G0;
   delete []G1;
