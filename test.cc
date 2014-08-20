@@ -51,14 +51,13 @@ static void test2(void)
 
 static void test3(void)
 {
-  char H[32];
-  char M[1];
+  char H[64];
+  char M[] = {0x54, 0x65, 0x73, 0x74, 0x2e}; // Test.
   size_t i = 0;
 
   memset(H, 0, sizeof(H));
-  M[0] = (char) 0xff;
-  libskein_simplehash(H, 32, 256, M, 1, 256);
-  printf("Test #3, 256-bit Simple Skein: ");
+  libskein_simplehash(H, 64, 512, M, 5, 512);
+  printf("Test #3, 512-bit Simple Skein: ");
 
   for(i = 0; i < sizeof(H) / sizeof(H[0]); i++)
     printf("%02x", H[i] & 0xff);
