@@ -81,7 +81,7 @@ static uint64_t *ubi(const uint64_t *G,
 		     const size_t Nb,
 		     const size_t block_size)
 {
-  if(!G || !M || M_size <= 0 || Nb <= 0)
+  if(!G || !M || M_size <= 0 || Nb <= 0 || block_size <= 0)
     return 0;
 
   /*
@@ -170,6 +170,11 @@ static uint64_t *ubi(const uint64_t *G,
 
       for(size_t j = 0; j < Nb / 8; j++)
 	H[j] = Mi[j] ^ Mpp[j + i * Nb / 8];
+
+      purge(E, sizeof(E));
+      purge(K, sizeof(K));
+      purge(P, sizeof(P));
+      purge(T, sizeof(T));
     }
 
  done:
