@@ -43,17 +43,34 @@ extern "C"
 {
 #endif
 
-void libskein_simplehash(char *H,
-			 const size_t Nb,
-			 const size_t No,
-			 const char *M,
-			 const size_t M_size,
-			 const size_t block_size);
-void libskein_threefish(char *E,
-			const char *K,
-			const char *T,
-			const char *P,
-			const size_t block_size);
+void libskein_simplehash(char *H, /*
+				  ** Output storage. The size of the
+				  ** container must be identical to
+				  ** No / 8.
+				  */
+			 const size_t Nb, // Must be 32, 64, or 128 bytes.
+			 const size_t No, // The output size in bits.
+			 const char *M, // The message.
+			 const size_t M_size, // The size of the message.
+			 const size_t block_size); /*
+						   ** The block size in
+						   ** bits. Must be 256,
+						   ** 512, or 1024.
+						   */
+void libskein_threefish(char *E, /*
+				 ** Output storage. The size of the
+				 ** container must be identical to
+				 ** the size of P.
+				 */
+			const char *K, // Must be 32, 64, or 128 bytes.
+			const char *T, // Must be 16 bytes.
+			const char *P, // The plaintext.
+			const size_t P_size,
+			const size_t block_size); /*
+						  ** The block size in
+						  ** bits. Must be 256,
+						  ** 512, or 1024.
+						  */
 
 class libskein_tweak
 {

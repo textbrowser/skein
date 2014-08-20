@@ -165,7 +165,7 @@ static uint64_t *ubi(const uint64_t *G,
       wordsToBytes(K, H, Nb);
       wordsToBytes(P, Mi, Nb / 8);
       wordsToBytes(T, Tweak.value(), 2);
-      libskein_threefish(E, K, T, P, block_size);
+      libskein_threefish(E, K, T, P, Nb, block_size);
       bytesToWords(Mi, E, Nb);
 
       for(size_t j = 0; j < Nb / 8; j++)
@@ -257,9 +257,10 @@ static void threefish(char *E,
 		      const char *K,
 		      const char *T,
 		      const char *P,
+		      const size_t P_size,
 		      const size_t block_size)
 {
-  if(!E || !K || !T || !P || block_size <= 0)
+  if(!E || !K || !T || !P || P_size <= 0 || block_size <= 0)
     return;
 
   /*
@@ -403,9 +404,10 @@ void libskein_threefish(char *E,
 			const char *K,
 			const char *T,
 			const char *P,
+			const size_t P_size,
 			const size_t block_size)
 {
-  if(!E || !K || !P || !T || block_size <= 0)
+  if(!E || !K || !P || P_size <= 0 || !T || block_size <= 0)
     return;
 
   if(block_size == 256)
@@ -429,5 +431,5 @@ void libskein_threefish(char *E,
   else
     return;
 
-  threefish(E, K, T, P, block_size);
+  threefish(E, K, T, P, P_size, block_size);
 }
