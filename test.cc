@@ -49,26 +49,9 @@ static void test2(void)
   printf(".\n");
 }
 
-static void test3(void)
-{
-  char H[64];
-  char M[] = {0x54, 0x65, 0x73, 0x74, 0x2e}; // Test.
-  size_t i = 0;
-
-  memset(H, 0, sizeof(H));
-  libskein_simplehash(H, sizeof(H), 512, M, 5, 512);
-  printf("Test #3, 512-512-bit Simple Skein: ");
-
-  for(i = 0; i < sizeof(H) / sizeof(H[0]); i++)
-    printf("%02x", H[i] & 0xff);
-
-  printf(".\n");
-}
-
 int main(void)
 {
   test1();
   test2();
-  test3();
   return EXIT_SUCCESS;
 }

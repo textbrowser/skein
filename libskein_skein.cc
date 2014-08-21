@@ -27,14 +27,6 @@
 
 #include "libskein_skein.h"
 
-static const short UBI_TYPE_KEY = 0;
-static const short UBI_TYPE_CFG = 4;
-static const short UBI_TYPE_PRS = 8;
-static const short UBI_TYPE_PK = 12;
-static const short UBI_TYPE_KDF = 16;
-static const short UBI_TYPE_NON = 20;
-static const short UBI_TYPE_MSG = 48;
-static const short UBI_TYPE_OUT = 63;
 static const uint8_t *Pi = 0;
 static const uint8_t Pi_4[4] = {0, 3, 2, 1};
 static const uint8_t Pi_8[8] = {2, 1, 4, 7, 6, 5, 0, 3};
@@ -73,116 +65,6 @@ static void purge(void *buffer, const size_t buffer_size);
 static void wordsToBytes(char *B,
 			 const uint64_t *words,
 			 const size_t words_size);
-
-static uint64_t *ubi(const uint64_t *G,
-		     const char *M,
-		     const size_t M_size,
-		     const short Type,
-		     const size_t Nb,
-		     const size_t block_size)
-{
-  if(!G || !M || M_size <= 0 || Nb <= 0 || block_size <= 0)
-    return 0;
-
-  /*
-  ** Section 3.4.
-  */
-
-  char *Mp = 0;
-  libskein_tweak Tweak(Type);
-  size_t NM = M_size;
-  size_t bit_count = 8 * M_size;
-  size_t k = std::max(static_cast<size_t> (1), (NM + Nb - 1) / Nb);
-  uint16_t B = 0;
-  uint64_t *H = 0;
-  uint64_t *Mi = 0;
-  uint64_t *Mpp = 0;
-
-  H = new (std::nothrow) uint64_t[Nb];
-
-  if(!H)
-    goto done;
-  else
-    memcpy(H, G, Nb);
-
-  Mi = new (std::nothrow) uint64_t[Nb / 8];
-
-  if(!Mi)
-    goto done;
-
-  Mp = new (std::nothrow) char[M_size];
-
-  if(!Mp)
-    goto done;
-  else
-    memcpy(Mp, M, M_size);
-
-  if((bit_count & 7) != 0)
-    {
-      B = 1;
-      Mp[M_size - 1] = static_cast<char> ((1 << (7 - (bit_count & 7))));
-    }
-  else
-    B = 0;
-
-  Mpp = new (std::nothrow) uint64_t[k * Nb / 8];
-
-  if(!Mpp)
-    goto done;
-
-  bytesToWords(Mpp, Mp, M_size);
-
-  for(size_t i = 0; i < k; i++)
-    {
-      Tweak.setPosition(std::min(NM, (i + 1) * Nb));
-
-      if(i == 0)
-	Tweak.setFirst(true);
-      else
-	Tweak.setFirst(false);
-
-      if(i == k - 1)
-	Tweak.setLast(true);
-      else
-	Tweak.setLast(false);
-
-      if(Tweak.isLast())
-	{
-	  if(B == 0)
-	    Tweak.setPadded(false);
-	  else
-	    Tweak.setPadded(true);
-	}
-
-      for(size_t j = 0; j < Nb / 8; j++)
-	Mi[j] = Mpp[j + i * Nb / 8];
-
-      char E[Nb];
-      char K[8 * Nb];
-      char P[Nb];
-      char T[16];
-
-      wordsToBytes(K, H, Nb);
-      wordsToBytes(P, Mi, Nb / 8);
-      wordsToBytes(T, Tweak.value(), 2);
-      libskein_threefish(E, K, T, P, Nb, block_size);
-      bytesToWords(Mi, E, Nb);
-
-      for(size_t j = 0; j < Nb / 8; j++)
-	H[j] = Mi[j] ^ Mpp[j + i * Nb / 8];
-
-      purge(E, sizeof(E));
-      purge(K, sizeof(K));
-      purge(P, sizeof(P));
-      purge(T, sizeof(T));
-    }
-
- done:
-  delete []Mi;
-  delete []Mp;
-  delete []Mpp;
-  return H;
-}
 
 static void bytesToWords(uint64_t *W,
 			 const char *bytes,
@@ -365,39 +247,6 @@ static void wordsToBytes(char *B,
       B[i * 8 + 6] = static_cast<char> ((words[i] >> 48) & 0xff);
       B[i * 8 + 7] = static_cast<char> ((words[i] >> 56) & 0xff);
     }
-}
-
-void libskein_simplehash(char *H,
-			 const size_t Nb,
-			 const size_t No,
-			 const char *M,
-			 const size_t M_size,
-			 const size_t block_size)
-{
-  if(!H || !M || M_size <= 0 || Nb <= 0 || No <= 0 || block_size <= 0)
-    return;
-
-  if(!(Nb == 32 || Nb == 64 || Nb == 128))
-    return;
-
-  /*
-  ** Section 3.5.
-  */
-
-  char C[32];
-  uint64_t *G0 = 0;
-  uint64_t *G1 = 0;
-  uint64_t K_p[Nb];
-
-  memset(C, 0, sizeof(C));
-  memcpy(C, "SHA3", 4);
-  C[4] = 1;
-  memcpy(&C[8], &No, 8);
-  memset(K_p, 0, Nb);
-  G0 = ubi(K_p, C, sizeof(C), UBI_TYPE_CFG, Nb, block_size);
-  G1 = ubi(G0, M, M_size, UBI_TYPE_MSG, Nb, block_size);
-  delete []G0;
-  delete []G1;
 }
 
 void libskein_threefish(char *E,
