@@ -82,7 +82,7 @@ class libskein_tweak
   libskein_tweak(const short type)
   {
     m_t[0] = 0ULL; // Position.
-    m_t[1] = (static_cast<uint64_t> (type)) << 56; // 56 = 120 - 64.
+    m_t[1] = static_cast<uint64_t> (type) << 56; // 56 = 120 - 64.
     m_type = type;
   }
 
