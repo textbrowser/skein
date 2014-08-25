@@ -171,6 +171,17 @@ static void purge(void *buffer,
     }
 }
 
+static void threefish_decrypt(char *D,
+			      const char *K,
+			      const char *T,
+			      const char *C,
+			      const size_t C_size,
+			      const size_t block_size)
+{
+  if(!C || C_size <= 0 || !D || !K || !T || block_size <= 0)
+    return;
+}
+
 static void threefish_encrypt(char *E,
 			      const char *K,
 			      const char *T,
@@ -283,6 +294,17 @@ static void wordsToBytes(char *B,
       B[i * 8 + 6] = static_cast<char> ((words[i] >> 48) & 0xff);
       B[i * 8 + 7] = static_cast<char> ((words[i] >> 56) & 0xff);
     }
+}
+
+void libskein_threefish_decrypt(char *D,
+				const char *K,
+				const char *T,
+				const char *C,
+				const size_t C_size,
+				const size_t block_size)
+{
+  if(!C || C_size <= 0 || !D || !K || !T || block_size <= 0)
+    return;
 }
 
 void libskein_threefish_encrypt(char *E,
