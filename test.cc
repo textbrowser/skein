@@ -16,8 +16,8 @@ static void test1(void)
   size_t i = 0;
 
   memset(E, 0, sizeof(E));
-  libskein_threefish(E, K, T, P, 32, 256);
-  printf("Test #1, 256-bit Threefish: ");
+  libskein_threefish_encrypt(E, K, T, P, 32, 256);
+  printf("Test #1, 256-bit Threefish Encryption: ");
 
   for(i = 0; i < sizeof(E) / sizeof(E[0]); i++)
     printf("%02x", E[i] & 0xff);
@@ -40,8 +40,8 @@ static void test2(void)
   size_t i = 0;
 
   memset(E, 0, sizeof(E));
-  libskein_threefish(E, K, T, P, 64, 512);
-  printf("Test #2, 512-bit Threefish: ");
+  libskein_threefish_encrypt(E, K, T, P, 64, 512);
+  printf("Test #2, 512-bit Threefish Encryption: ");
 
   for(i = 0; i < sizeof(E) / sizeof(E[0]); i++)
     printf("%02x", E[i] & 0xff);

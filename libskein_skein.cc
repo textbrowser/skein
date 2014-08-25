@@ -135,12 +135,12 @@ static void purge(void *buffer,
     }
 }
 
-static void threefish(char *E,
-		      const char *K,
-		      const char *T,
-		      const char *P,
-		      const size_t P_size,
-		      const size_t block_size)
+static void threefish_encrypt(char *E,
+			      const char *K,
+			      const char *T,
+			      const char *P,
+			      const size_t P_size,
+			      const size_t block_size)
 {
   if(!E || !K || !T || !P || P_size <= 0 || block_size <= 0)
     return;
@@ -249,12 +249,12 @@ static void wordsToBytes(char *B,
     }
 }
 
-void libskein_threefish(char *E,
-			const char *K,
-			const char *T,
-			const char *P,
-			const size_t P_size,
-			const size_t block_size)
+void libskein_threefish_encrypt(char *E,
+				const char *K,
+				const char *T,
+				const char *P,
+				const size_t P_size,
+				const size_t block_size)
 {
   if(!E || !K || !P || P_size <= 0 || !T || block_size <= 0)
     return;
@@ -280,5 +280,5 @@ void libskein_threefish(char *E,
   else
     return;
 
-  threefish(E, K, T, P, P_size, block_size);
+  threefish_encrypt(E, K, T, P, P_size, block_size);
 }

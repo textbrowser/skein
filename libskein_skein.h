@@ -43,20 +43,21 @@ extern "C"
 {
 #endif
 
-void libskein_threefish(char *E, /*
-				 ** Output storage. The size of the
-				 ** container must be identical to
-				 ** the size of P.
-				 */
-			const char *K, // Must be 32, 64, or 128 bytes.
-			const char *T, // Must be 16 bytes.
-			const char *P, // The plaintext.
-			const size_t P_size,
-			const size_t block_size); /*
-						  ** The block size in
-						  ** bits. Must be 256,
-						  ** 512, or 1024.
-						  */
+void libskein_threefish_encrypt
+(char *E, /*
+	  ** Output storage. The size of the
+	  ** container must be identical to
+	  ** the size of P.
+	  */
+ const char *K, // Must be 32, 64, or 128 bytes.
+ const char *T, // Must be 16 bytes.
+ const char *P, // The plaintext.
+ const size_t P_size,
+ const size_t block_size); /*
+			   ** The block size in
+			   ** bits. Must be 256,
+			   ** 512, or 1024.
+			   */
 
 #ifdef __cplusplus
 }
