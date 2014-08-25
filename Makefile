@@ -18,14 +18,8 @@ clean:
 
 distclean: clean
 
-install:
-	$(MAKE) -f $(MAKEFILE) install
-
 library:
 	$(MAKE) -f $(MAKEFILE) library
 
 purge:
 	$(MAKE) -f $(MAKEFILE) purge
-
-uninstall:
-	$(MAKE) -f $(MAKEFILE) uninstall

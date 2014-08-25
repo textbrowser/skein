@@ -106,18 +106,54 @@ static void mix(const uint64_t x0,
   ** Section 3.3.1.
   */
 
+  uint64_t r = 0;
+
+  if(block_size == 256)
+    r = R_4[d % 8][j];
+  else if(block_size == 512)
+    r = R_8[d % 8][j];
+  else
+    r = R_16[d % 8][j];
+
   *y0 = x0 + x1;
 
   /*
   ** Please see https://en.wikipedia.org/wiki/Circular_shift.
   */
 
+  *y1 = ((x1 << r) | (x1 >> (64 - r))) ^ *y0;
+}
+
+static void mix_inverse(const uint64_t y0,
+			const uint64_t y1,
+			const size_t d,
+			const size_t j,
+			uint64_t *x0,
+			uint64_t *x1,
+			const size_t block_size)
+{
+  if(!x0 || !x1)
+    return;
+
+  /*
+  ** Section 3.3.1.
+  */
+
+  uint64_t r = 0;
+
   if(block_size == 256)
-    *y1 = ((x1 << R_4[d % 8][j]) | (x1 >> (64 - R_4[d % 8][j]))) ^ *y0;
+    r = R_4[d % 8][j];
   else if(block_size == 512)
-    *y1 = ((x1 << R_8[d % 8][j]) | (x1 >> (64 - R_8[d % 8][j]))) ^ *y0;
+    r = R_8[d % 8][j];
   else
-    *y1 = ((x1 << R_16[d % 8][j]) | (x1 >> (64 - R_16[d % 8][j]))) ^ *y0;
+    r = R_16[d % 8][j];
+
+  /*
+  ** Please see https://en.wikipedia.org/wiki/Circular_shift.
+  */
+
+  *x1 = ((y1 ^ y0) >> r) | ((y1 ^ y0) << (64 - r));
+  *x0 = y0 - *x1;
 }
 
 static void purge(void *buffer,

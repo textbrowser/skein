@@ -1,10 +1,11 @@
-CXXFLAGS = -fPIC -Wall -Wconversion -Werror -Wextra
+CXXFLAGS = -fPIC -Wall -Wconversion -Werror -Wextra \
+	   -Wno-unused-function
 
 CXX = g++
 OBJECT_FILES = libskein_skein.o
 
 all:	library $(OBJECT_FILES)
-	$(CXX) test.cc -o test.exe -L. -lskein -Wl,-rpath,.
+	$(CXX) test.cc -o test.exe -L. -lskein
 
 libskein_threefish.o: libskein_skein.cc libskein_skein.h
 	$(CXX) $(CXXFLAGS) -c -o libskein_skein.o libskein_skein.cc

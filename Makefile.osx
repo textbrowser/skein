@@ -1,5 +1,5 @@
 CXXFLAGS = -fPIC -Wall -Wconversion -Werror -Wextra \
-	   -Wformat=2 -Wpointer-arith \
+	   -Wformat=2 -Wno-unused-function -Wpointer-arith \
 	   -Wstrict-overflow=5
 
 CXX = clang++
@@ -15,15 +15,8 @@ clean:
 	rm -f *.o libskein.dylib
 	rm -f test
 
-install: all
-	install -o root -g wheel -d /usr/local/lib
-	install -o root -g wheel libskein.dylib /usr/local/lib
-
 library: $(OBJECT_FILES)
 	$(CXX) -dynamiclib -o libskein.dylib $?
 
 purge:
 	rm -f *~*
-
-uninstall:
-	rm -f /usr/local/lib/libskein.dylib
