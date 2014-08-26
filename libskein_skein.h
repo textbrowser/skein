@@ -36,6 +36,7 @@ extern "C"
 }
 
 #include <algorithm>
+#include <iostream>
 #include <new>
 
 #ifdef __cplusplus

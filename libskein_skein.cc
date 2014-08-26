@@ -28,10 +28,15 @@
 #include "libskein_skein.h"
 
 static const uint8_t *Pi = 0;
+static const uint8_t *RPi = 0;
 static const uint8_t Pi_4[4] = {0, 3, 2, 1};
 static const uint8_t Pi_8[8] = {2, 1, 4, 7, 6, 5, 0, 3};
 static const uint8_t Pi_16[16] = {0, 9, 2, 13, 6, 11, 4, 15,
 				  10, 7, 12, 3, 14, 5, 8, 1};
+static const uint8_t RPi_4[4] = {0, 3, 2, 1};
+static const uint8_t RPi_8[8] = {6, 1, 0, 7, 2, 5, 4, 3};
+static const uint8_t RPi_16[16] = {0, 15, 2, 11, 6, 13, 4, 9,
+				   14, 1, 8, 5, 10, 3, 12, 7};
 static const uint8_t R_4[8][2] = {{14, 16},
 				  {52, 57},
 				  {23, 40},
@@ -94,7 +99,7 @@ static void bytesToWords(uint64_t *W,
 static void mix(const uint64_t x0,
 		const uint64_t x1,
 		const size_t d,
-		const size_t j,
+		const size_t i,
 		uint64_t *y0,
 		uint64_t *y1,
 		const size_t block_size)
@@ -109,11 +114,11 @@ static void mix(const uint64_t x0,
   uint64_t r = 0;
 
   if(block_size == 256)
-    r = R_4[d % 8][j];
+    r = R_4[d % 8][i];
   else if(block_size == 512)
-    r = R_8[d % 8][j];
+    r = R_8[d % 8][i];
   else
-    r = R_16[d % 8][j];
+    r = R_16[d % 8][i];
 
   *y0 = x0 + x1;
 
@@ -127,7 +132,7 @@ static void mix(const uint64_t x0,
 static void mix_inverse(const uint64_t y0,
 			const uint64_t y1,
 			const size_t d,
-			const size_t j,
+			const size_t i,
 			uint64_t *x0,
 			uint64_t *x1,
 			const size_t block_size)
@@ -142,17 +147,17 @@ static void mix_inverse(const uint64_t y0,
   uint64_t r = 0;
 
   if(block_size == 256)
-    r = R_4[d % 8][j];
+    r = R_4[d % 8][i];
   else if(block_size == 512)
-    r = R_8[d % 8][j];
+    r = R_8[d % 8][i];
   else
-    r = R_16[d % 8][j];
+    r = R_16[d % 8][i];
 
   /*
   ** Please see https://en.wikipedia.org/wiki/Circular_shift.
   */
 
-  *x1 = ((y1 ^ y0) >> r) | ((y1 ^ y0) << (64 - r));
+  *x1 = ((y1 ^ y0) << (64 - r)) | ((y1 ^ y0) >> r);
   *x0 = y0 - *x1;
 }
 
@@ -187,9 +192,9 @@ static void threefish_decrypt(char *D,
 
   uint64_t C240 = 0x1bd11bdaa9fc1a22;
   uint64_t c[Nw];
-  uint64_t dc[Nw];
   uint64_t k[Nw + 1];
   uint64_t kNw = C240; // Section 3.3.2.
+  uint64_t p[Nw];
   uint64_t s[Nr / 4 + 1][Nw];
   uint64_t t[3];
   uint64_t v[Nw];
@@ -212,65 +217,53 @@ static void threefish_decrypt(char *D,
   ** Prepare the key schedule, section 3.3.2.
   */
 
-  for(size_t d = Nr / 4;; d--) // d rounds.
-    {
-      for(size_t i = Nw - 1;; i--)
-	{	
-	  s[d][i] = k[(d + i) % (Nw + 1)];
+  for(size_t d = 0; d < Nr / 4 + 1; d++) // d rounds.
+    for(size_t i = 0; i < Nw; i++)
+      {	
+	s[d][i] = k[(d + i) % (Nw + 1)];
 
-	  if(i == Nw - 1)
-	    s[d][i] += d;
-	  else if(i == Nw - 2)
-	    s[d][i] += t[(d + 1) % 3];
-	  else if(i == Nw - 3)
-	    s[d][i] += t[d % 3];
+	if(i == Nw - 1)
+	  s[d][i] += d;
+	else if(i == Nw - 2)
+	  s[d][i] += t[(d + 1) % 3];
+	else if(i == Nw - 3)
+	  s[d][i] += t[d % 3];
+      }
 
-	  if(i == 0)
-	    break;
-	}
-
-      if(d == 0)
-	break;
-    }
-  
-  for(size_t d = Nr - 1;; d--) // d rounds.
+  for(size_t d = Nr; d > 0; d--) // d rounds.
     {
       uint64_t e[Nw];
-
-      for(size_t i = 0; i < Nw; i++)
-	e[i] = (d % 4 == 0) ? v[i] - s[d / 4][i] : v[i];
-
       uint64_t f[Nw];
 
       for(size_t i = 0; i < Nw; i++)
-	f[Pi[i]] = v[i];
+	f[i] = (d % 4 == 0) ? v[i] - s[d / 4][i] : v[i];
 
-      for(size_t j = 0; j < Nw / 2; j++)
+      for(size_t i = 0; i < Nw; i++)
+	e[i] = f[RPi[i]];
+
+      for(size_t i = 0; i < Nw / 2; i++)
 	{
 	  uint64_t x0 = 0;
 	  uint64_t x1 = 0;
-	  uint64_t y0 = e[j * 2];
-	  uint64_t y1 = e[j * 2 + 1];
+	  uint64_t y0 = e[i * 2];
+	  uint64_t y1 = e[i * 2 + 1];
 
-	  mix_inverse(y0, y1, d, j, &x0, &x1, block_size);
-	  v[j * 2] = x0;
-	  v[j * 2 + 1] = x1;
+	  mix_inverse(y0, y1, d - 1, i, &x0, &x1, block_size);
+	  v[i * 2] = x0;
+	  v[i * 2 + 1] = x1;
 	}
 
       purge(e, sizeof(e));
       purge(f, sizeof(f));
-
-      if(d == 0)
-	break;
     }
 
   for(size_t i = 0; i < Nw; i++)
-    dc[i] = v[i] + s[Nr / 4][i];
+    p[i] = v[i] - s[0][i];
 
-  wordsToBytes(D, dc, Nw);
+  wordsToBytes(D, p, Nw);
   purge(c, sizeof(c));
-  purge(dc, sizeof(dc));
   purge(k, sizeof(k));
+  purge(p, sizeof(p));
   purge(s, sizeof(s));
   purge(t, sizeof(t));
   purge(v, sizeof(v));
@@ -339,16 +332,16 @@ static void threefish_encrypt(char *E,
 
       uint64_t f[Nw];
 
-      for(size_t j = 0; j < Nw / 2; j++)
+      for(size_t i = 0; i < Nw / 2; i++)
 	{
-	  uint64_t x0 = e[j * 2];
-	  uint64_t x1 = e[j * 2 + 1];
+	  uint64_t x0 = e[i * 2];
+	  uint64_t x1 = e[i * 2 + 1];
 	  uint64_t y0 = 0;
 	  uint64_t y1 = 0;
 
-	  mix(x0, x1, d, j, &y0, &y1, block_size);
-	  f[j * 2] = y0;
-	  f[j * 2 + 1] = y1;
+	  mix(x0, x1, d, i, &y0, &y1, block_size);
+	  f[i * 2] = y0;
+	  f[i * 2 + 1] = y1;
 	}
 
       for(size_t i = 0; i < Nw; i++)
@@ -404,19 +397,19 @@ void libskein_threefish_decrypt(char *D,
     {
       Nr = 72;
       Nw = 4;
-      Pi = Pi_4;
+      RPi = RPi_4;
     }
   else if(block_size == 512)
     {
       Nr = 72;
       Nw = 8;
-      Pi = Pi_8;
+      RPi = RPi_8;
     }
   else if(block_size == 1024)
     {
       Nr = 80;
       Nw = 16;
-      Pi = Pi_16;
+      RPi = RPi_16;
     }
   else
     return;
