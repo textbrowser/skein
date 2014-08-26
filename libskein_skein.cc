@@ -199,7 +199,7 @@ static void threefish_decrypt(char *D,
   uint64_t t[3];
   uint64_t v[Nw];
 
-  bytesToWords(c, C, block_size / 8);
+  bytesToWords(c, C, C_size);
   bytesToWords(k, K, block_size / 8);
   bytesToWords(t, T, 16);
 
@@ -294,7 +294,7 @@ static void threefish_encrypt(char *E,
   uint64_t v[Nw];
 
   bytesToWords(k, K, block_size / 8);
-  bytesToWords(p, P, block_size / 8);
+  bytesToWords(p, P, P_size);
   bytesToWords(t, T, 16);
 
   for(size_t i = 0; i < Nw; i++)
@@ -368,7 +368,7 @@ static void wordsToBytes(char *B,
 			 const uint64_t *words,
 			 const size_t words_size)
 {
-  if(!B || !words)
+  if(!B || !words || words_size <= 0)
     return;
 
   for(size_t i = 0; i < words_size; i++)
