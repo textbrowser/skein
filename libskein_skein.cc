@@ -217,7 +217,7 @@ static void threefish_decrypt(char *D,
   ** Prepare the key schedule, section 3.3.2.
   */
 
-  for(int d = static_cast<int> (Nr) / 4; d >= 0; d--) // d rounds.
+  for(int d = static_cast<int> (Nr) / 4; d >= 0; d--)
     for(size_t i = 0; i < Nw; i++)
       {
 	s[d][i] = k[(d + i) % (Nw + 1)];
@@ -230,7 +230,7 @@ static void threefish_decrypt(char *D,
 	  s[d][i] += t[d % 3];
       }
 
-  for(size_t d = Nr; d > 0; d--) // d rounds.
+  for(size_t d = Nr; d > 0; d--)
     {
       uint64_t f[Nw];
 
@@ -311,7 +311,7 @@ static void threefish_encrypt(char *E,
   ** Prepare the key schedule, section 3.3.2.
   */
 
-  for(size_t d = 0; d < Nr / 4 + 1; d++) // d rounds.
+  for(size_t d = 0; d < Nr / 4 + 1; d++)
     for(size_t i = 0; i < Nw; i++)
       {	
 	s[d][i] = k[(d + i) % (Nw + 1)];
@@ -324,7 +324,7 @@ static void threefish_encrypt(char *E,
 	  s[d][i] += t[d % 3];
       }
 
-  for(size_t d = 0; d < Nr; d++) // d rounds.
+  for(size_t d = 0; d < Nr; d++)
     {
       uint64_t e[Nw];
 
