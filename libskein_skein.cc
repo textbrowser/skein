@@ -232,11 +232,12 @@ static void threefish_decrypt(char *D,
 
   for(size_t d = Nr; d > 0; d--) // d rounds.
     {
-      uint64_t e[Nw];
       uint64_t f[Nw];
 
       for(size_t i = 0; i < Nw; i++)
 	f[i] = (d % 4 == 0) ? v[i] - s[d / 4][i] : v[i];
+
+      uint64_t e[Nw];
 
       for(size_t i = 0; i < Nw; i++)
 	e[i] = f[RPi[i]];
