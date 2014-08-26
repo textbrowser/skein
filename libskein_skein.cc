@@ -217,9 +217,9 @@ static void threefish_decrypt(char *D,
   ** Prepare the key schedule, section 3.3.2.
   */
 
-  for(size_t d = 0; d < Nr / 4 + 1; d++) // d rounds.
+  for(int d = static_cast<int> (Nr) / 4; d >= 0; d--) // d rounds.
     for(size_t i = 0; i < Nw; i++)
-      {	
+      {
 	s[d][i] = k[(d + i) % (Nw + 1)];
 
 	if(i == Nw - 1)
