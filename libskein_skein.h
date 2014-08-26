@@ -58,7 +58,6 @@ void libskein_threefish_decrypt
 			   ** bits. Must be 256,
 			   ** 512, or 1024.
 			   */
-
 void libskein_threefish_encrypt
 (char *E, /*
 	  ** Output storage. The size of the
