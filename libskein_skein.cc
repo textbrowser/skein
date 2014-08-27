@@ -230,32 +230,36 @@ static void threefish_decrypt(char *D,
 	  s[d][i] += t[d % 3];
       }
 
-  for(size_t i = 0; i < Nw; i++)
-    v[i] -= s[Nr / 4][i];
-
-  for(int d = static_cast<int> (Nr) - 1; d >= 0; d--)
+  for(size_t d = Nr; d > 0; d--)
     {
+      uint64_t f[Nw];
+
       for(size_t i = 0; i < Nw; i++)
-	v[i] = v[RPi[i]];
+	f[i] = (d % 4 == 0) ? v[i] - s[d / 4][i] : v[i];
+
+      uint64_t e[Nw];
+
+      for(size_t i = 0; i < Nw; i++)
+	e[i] = f[RPi[i]];
 
       for(size_t i = 0; i < Nw / 2; i++)
 	{
 	  uint64_t x0 = 0;
 	  uint64_t x1 = 0;
-	  uint64_t y0 = v[i * 2];
-	  uint64_t y1 = v[i * 2 + 1];
+	  uint64_t y0 = e[i * 2];
+	  uint64_t y1 = e[i * 2 + 1];
 
-	  mix_inverse(y0, y1, d, i, &x0, &x1, block_size);
+	  mix_inverse(y0, y1, d - 1, i, &x0, &x1, block_size);
 	  v[i * 2] = x0;
 	  v[i * 2 + 1] = x1;
 	}
 
-      for(size_t i = 0; i < Nw; i++)
-	v[i] = (d % 4 == 0) ? v[i] - s[d / 4][i] : v[i];
+      purge(e, sizeof(e));
+      purge(f, sizeof(f));
     }
 
   for(size_t i = 0; i < Nw; i++)
-    p[i] = v[i];
+    p[i] = v[i] - s[0][i];
 
   wordsToBytes(D, p, Nw);
   purge(c, sizeof(c));
