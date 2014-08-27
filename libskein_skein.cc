@@ -227,7 +227,7 @@ static void threefish_decrypt(char *D,
   for(size_t i = 0; i < Nw; i++)
     v[i] -= s[Nr / 4][i];
 
-  for(int d = static_cast<int> (Nr) - 1; d >= 0; d--)
+  for(size_t d = Nr - 1;; d--)
     {
       uint64_t f[Nw];
 
@@ -251,6 +251,9 @@ static void threefish_decrypt(char *D,
       if(d % 4 == 0)
 	for(size_t i = 0; i < Nw; i++)
 	  v[i] -= s[d / 4][i];
+
+      if(d == 0)
+	break;
     }
 
   wordsToBytes(D, v, Nw);
