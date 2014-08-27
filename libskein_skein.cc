@@ -85,14 +85,14 @@ static void bytesToWords(uint64_t *W,
       for(size_t j = 0; j < 8; j++)
 	b[j] = bytes[i * 8 + j];
 
-      W[i] = static_cast<uint64_t> (b[0]) |
-	(static_cast<uint64_t> (b[1]) << 8) |
-	(static_cast<uint64_t> (b[2]) << 16) |
-	(static_cast<uint64_t> (b[3]) << 24) |
-	(static_cast<uint64_t> (b[4]) << 32) |
-	(static_cast<uint64_t> (b[5]) << 40) |
-	(static_cast<uint64_t> (b[6]) << 48) |
-	(static_cast<uint64_t> (b[7]) << 56);
+      W[i] = static_cast<uint64_t> (b[0] & 0xff) |
+	(static_cast<uint64_t> (b[1] & 0xff) << 8) |
+	(static_cast<uint64_t> (b[2] & 0xff) << 16) |
+	(static_cast<uint64_t> (b[3] & 0xff) << 24) |
+	(static_cast<uint64_t> (b[4] & 0xff) << 32) |
+	(static_cast<uint64_t> (b[5] & 0xff) << 40) |
+	(static_cast<uint64_t> (b[6] & 0xff) << 48) |
+	(static_cast<uint64_t> (b[7] & 0xff) << 56);
     }
 }
 
@@ -157,7 +157,7 @@ static void mix_inverse(const uint64_t y0,
   ** Please see https://en.wikipedia.org/wiki/Circular_shift.
   */
 
-  *x1 = ((y1 ^ y0) << (64 - r)) | ((y1 ^ y0) >> r);
+  *x1 = ((y1 ^ y0) >> r) | ((y1 ^ y0) << (64 - r));
   *x0 = y0 - *x1;
 }
 
@@ -191,26 +191,20 @@ static void threefish_decrypt(char *D,
   */
 
   uint64_t C240 = 0x1bd11bdaa9fc1a22;
-  uint64_t c[Nw];
   uint64_t k[Nw + 1];
   uint64_t kNw = C240; // Section 3.3.2.
-  uint64_t p[Nw];
   uint64_t s[Nr / 4 + 1][Nw];
   uint64_t t[3];
   uint64_t v[Nw];
 
-  bytesToWords(c, C, C_size);
-  bytesToWords(k, K, block_size / 8);
+  bytesToWords(k, K, C_size);
   bytesToWords(t, T, 16);
+  bytesToWords(v, C, C_size);
 
   for(size_t i = 0; i < Nw; i++)
     kNw ^= k[i]; // Section 3.3.2.
 
   k[Nw] = kNw;
-
-  for(size_t i = 0; i < Nw; i++)
-    v[i] = c[i];
-
   t[2] = t[0] ^ t[1]; // Section 3.3.2.
 
   /*
@@ -230,41 +224,37 @@ static void threefish_decrypt(char *D,
 	  s[d][i] += t[d % 3];
       }
 
-  for(size_t d = Nr; d > 0; d--)
+  for(size_t i = 0; i < Nw; i++)
+    v[i] -= s[Nr / 4][i];
+
+  for(int d = static_cast<int> (Nr) - 1; d >= 0; d--)
     {
       uint64_t f[Nw];
 
       for(size_t i = 0; i < Nw; i++)
-	f[i] = (d % 4 == 0) ? v[i] - s[d / 4][i] : v[i];
-
-      uint64_t e[Nw];
-
-      for(size_t i = 0; i < Nw; i++)
-	e[i] = f[RPi[i]];
+	f[i] = v[RPi[i]];
 
       for(size_t i = 0; i < Nw / 2; i++)
 	{
 	  uint64_t x0 = 0;
 	  uint64_t x1 = 0;
-	  uint64_t y0 = e[i * 2];
-	  uint64_t y1 = e[i * 2 + 1];
+	  uint64_t y0 = f[i * 2];
+	  uint64_t y1 = f[i * 2 + 1];
 
-	  mix_inverse(y0, y1, d - 1, i, &x0, &x1, block_size);
+	  mix_inverse(y0, y1, d, i, &x0, &x1, block_size);
 	  v[i * 2] = x0;
 	  v[i * 2 + 1] = x1;
 	}
 
-      purge(e, sizeof(e));
       purge(f, sizeof(f));
+
+      if(d % 4 == 0)
+	for(size_t i = 0; i < Nw; i++)
+	  v[i] -= s[d / 4][i];
     }
 
-  for(size_t i = 0; i < Nw; i++)
-    p[i] = v[i] - s[0][i];
-
-  wordsToBytes(D, p, Nw);
-  purge(c, sizeof(c));
+  wordsToBytes(D, v, Nw);
   purge(k, sizeof(k));
-  purge(p, sizeof(p));
   purge(s, sizeof(s));
   purge(t, sizeof(t));
   purge(v, sizeof(v));
@@ -285,26 +275,20 @@ static void threefish_encrypt(char *E,
   */
 
   uint64_t C240 = 0x1bd11bdaa9fc1a22;
-  uint64_t c[Nw];
   uint64_t k[Nw + 1];
   uint64_t kNw = C240; // Section 3.3.2.
-  uint64_t p[Nw];
   uint64_t s[Nr / 4 + 1][Nw];
   uint64_t t[3];
   uint64_t v[Nw];
 
-  bytesToWords(k, K, block_size / 8);
-  bytesToWords(p, P, P_size);
+  bytesToWords(k, K, P_size);
   bytesToWords(t, T, 16);
+  bytesToWords(v, P, P_size);
 
   for(size_t i = 0; i < Nw; i++)
     kNw ^= k[i]; // Section 3.3.2.
 
   k[Nw] = kNw;
-
-  for(size_t i = 0; i < Nw; i++)
-    v[i] = p[i];
-
   t[2] = t[0] ^ t[1]; // Section 3.3.2.
 
   /*
@@ -326,17 +310,16 @@ static void threefish_encrypt(char *E,
 
   for(size_t d = 0; d < Nr; d++)
     {
-      uint64_t e[Nw];
-
-      for(size_t i = 0; i < Nw; i++)
-	e[i] = (d % 4 == 0) ? v[i] + s[d / 4][i] : v[i];
+      if(d % 4 == 0)
+	for(size_t i = 0; i < Nw; i++)
+	  v[i] += s[d / 4][i];
 
       uint64_t f[Nw];
 
       for(size_t i = 0; i < Nw / 2; i++)
 	{
-	  uint64_t x0 = e[i * 2];
-	  uint64_t x1 = e[i * 2 + 1];
+	  uint64_t x0 = v[i * 2];
+	  uint64_t x1 = v[i * 2 + 1];
 	  uint64_t y0 = 0;
 	  uint64_t y1 = 0;
 
@@ -348,17 +331,14 @@ static void threefish_encrypt(char *E,
       for(size_t i = 0; i < Nw; i++)
 	v[i] = f[Pi[i]];
 
-      purge(e, sizeof(e));
       purge(f, sizeof(f));
     }
 
   for(size_t i = 0; i < Nw; i++)
-    c[i] = v[i] + s[Nr / 4][i];
+    v[i] += s[Nr / 4][i];
 
-  wordsToBytes(E, c, Nw);
-  purge(c, sizeof(c));
+  wordsToBytes(E, v, Nw);
   purge(k, sizeof(k));
-  purge(p, sizeof(p));
   purge(s, sizeof(s));
   purge(t, sizeof(t));
   purge(v, sizeof(v));
