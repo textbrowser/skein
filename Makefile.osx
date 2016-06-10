@@ -1,6 +1,6 @@
 CXXFLAGS = -fPIC -Wall -Wconversion -Werror -Wextra \
 	   -Wformat=2 -Wno-unused-function -Wpointer-arith \
-	   -Wstrict-overflow=5
+	   -Wshadow -Wsign-conversion -Wstrict-overflow=5
 
 CXX = clang++
 OBJECT_FILES = libskein_skein.o
