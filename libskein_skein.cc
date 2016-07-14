@@ -191,11 +191,11 @@ static void threefish_decrypt(char *D,
   */
 
   uint64_t C240 = 0x1bd11bdaa9fc1a22;
-  uint64_t k[Nw + 1];
+  uint64_t *k = new uint64_t[Nw + 1];
   uint64_t kNw = C240; // Section 3.3.2.
-  uint64_t s[Nr / 4 + 1][Nw];
+  uint64_t **s = new uint64_t*[Nr / 4 + 1];
   uint64_t t[3];
-  uint64_t v[Nw];
+  uint64_t *v = new uint64_t[Nw];
 
   bytesToWords(k, K, C_size);
   bytesToWords(t, T, 16);
@@ -205,6 +205,10 @@ static void threefish_decrypt(char *D,
     kNw ^= k[i]; // Section 3.3.2.
 
   k[Nw] = kNw;
+
+  for(size_t i = 0; i < Nr / 4 + 1; i++)
+    s[i] = new uint64_t[Nw];
+
   t[2] = t[0] ^ t[1]; // Section 3.3.2.
 
   /*
@@ -229,7 +233,7 @@ static void threefish_decrypt(char *D,
 
   for(size_t d = Nr - 1;; d--)
     {
-      uint64_t f[Nw];
+      uint64_t *f = new uint64_t[Nw];
 
       for(size_t i = 0; i < Nw; i++)
 	f[i] = v[RPi[i]];
@@ -247,6 +251,7 @@ static void threefish_decrypt(char *D,
 	}
 
       purge(f, sizeof(f));
+      delete []f;
 
       if(d % 4 == 0)
 	for(size_t i = 0; i < Nw; i++)
@@ -261,6 +266,13 @@ static void threefish_decrypt(char *D,
   purge(s, sizeof(s));
   purge(t, sizeof(t));
   purge(v, sizeof(v));
+  delete []k;
+
+  for(size_t i = 0; i < Nr / 4 + 1; i++)
+    delete []s[i];
+
+  delete []s;
+  delete []v;
 }
 
 static void threefish_encrypt(char *E,
