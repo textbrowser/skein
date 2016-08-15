@@ -349,7 +349,7 @@ static void threefish_encrypt(char *E,
   delete []k;
 
   for(size_t i = 0; i < Nr / 4 + 1; i++)
-    {std::cout<<sizeof(*s[i])<<"\n";
+    {
       memset(s[i], 0, sizeof(*s[i]) * static_cast<size_t> (Nw));
       delete []s[i];
     }
