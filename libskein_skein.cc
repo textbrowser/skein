@@ -66,7 +66,6 @@ static size_t Nw = 0;
 static void bytesToWords(uint64_t *W,
 			 const char *bytes,
 			 const size_t bytes_size);
-static void purge(void *buffer, const size_t buffer_size);
 static void wordsToBytes(char *B,
 			 const uint64_t *words,
 			 const size_t words_size);
@@ -161,21 +160,6 @@ static void mix_inverse(const uint64_t y0,
   *x0 = y0 - *x1;
 }
 
-static void purge(void *buffer,
-		  const size_t buffer_size)
-{
-  if(!buffer || buffer_size <= 0)
-    return;
-
-  char *b = static_cast<char *> (buffer);
-
-  for(size_t i = 0; i < buffer_size; i++)
-    {
-      *b = 0;
-      b += 1;
-    }
-}
-
 static void threefish_decrypt(char *D,
 			      const char *K,
 			      const char *T,
@@ -250,7 +234,7 @@ static void threefish_decrypt(char *D,
 	  v[i * 2 + 1] = x1;
 	}
 
-      purge(f, sizeof(f));
+      memset(f, 0, sizeof(*f) * static_cast<size_t> (Nw));
       delete []f;
 
       if(d % 4 == 0)
@@ -262,14 +246,16 @@ static void threefish_decrypt(char *D,
     }
 
   wordsToBytes(D, v, Nw);
-  purge(k, sizeof(k));
-  purge(s, sizeof(s));
-  purge(t, sizeof(t));
-  purge(v, sizeof(v));
+  memset(k, 0, sizeof(*k) * static_cast<size_t> (Nw + 1));
+  memset(t, 0, sizeof(t));
+  memset(v, 0, sizeof(*v) * static_cast<size_t> (Nw));
   delete []k;
 
   for(size_t i = 0; i < Nr / 4 + 1; i++)
-    delete []s[i];
+    {
+      memset(s[i], 0, sizeof(*s[i]) * static_cast<size_t> (Nw));
+      delete []s[i];
+    }
 
   delete []s;
   delete []v;
@@ -349,7 +335,7 @@ static void threefish_encrypt(char *E,
       for(size_t i = 0; i < Nw; i++)
 	v[i] = f[Pi[i]];
 
-      purge(f, sizeof(f));
+      memset(f, 0, sizeof(*f) * static_cast<size_t> (Nw));
       delete []f;
     }
 
@@ -357,14 +343,16 @@ static void threefish_encrypt(char *E,
     v[i] += s[Nr / 4][i];
 
   wordsToBytes(E, v, Nw);
-  purge(k, sizeof(k));
-  purge(s, sizeof(s));
-  purge(t, sizeof(t));
-  purge(v, sizeof(v));
+  memset(k, 0, sizeof(*k) * static_cast<size_t> (Nw + 1));
+  memset(t, 0, sizeof(t));
+  memset(v, 0, sizeof(*v) * static_cast<size_t> (Nw));
   delete []k;
 
   for(size_t i = 0; i < Nr / 4 + 1; i++)
-    delete []s[i];
+    {std::cout<<sizeof(*s[i])<<"\n";
+      memset(s[i], 0, sizeof(*s[i]) * static_cast<size_t> (Nw));
+      delete []s[i];
+    }
 
   delete []s;
   delete []v;

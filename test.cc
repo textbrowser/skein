@@ -11,8 +11,8 @@ static void test1(void)
   char E[32];
   char K[32] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  char P[32] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  char P[32] = {'H', 'e', 'l', 'l', 'o', '.', 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   char T[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   size_t i = 0;
 
@@ -29,9 +29,9 @@ static void test1(void)
   libskein_threefish_decrypt(D, K, T, E, sizeof(E), 256);
 
   for(i = 0; i < sizeof(D) / sizeof(D[0]); i++)
-    printf("%02x", D[i] & 0xff);
+    printf("%c", D[i]);
 
-  printf(".\n");
+  printf("\n");
 }
 
 static void test2(void)
@@ -42,7 +42,7 @@ static void test2(void)
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  char P[64] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  char P[64] = {'!', 'B', 'y', 'e', '!', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -62,9 +62,9 @@ static void test2(void)
   libskein_threefish_decrypt(D, K, T, E, sizeof(E), 512);
 
   for(i = 0; i < sizeof(D) / sizeof(D[0]); i++)
-    printf("%02x", D[i] & 0xff);
+    printf("%c", D[i]);
 
-  printf(".\n");
+  printf("\n");
 }
 
 int main(void)
