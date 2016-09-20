@@ -74,7 +74,7 @@ static void bytesToWords(uint64_t *W,
 			 const char *bytes,
 			 const size_t bytes_size)
 {
-  if(!W || !bytes || bytes_size <= 0)
+  if(!W || !bytes || bytes_size == 0)
     return;
 
   for(size_t i = 0; i < bytes_size / 8; i++)
@@ -167,7 +167,7 @@ static void threefish_decrypt(char *D,
 			      const size_t C_size,
 			      const size_t block_size)
 {
-  if(!C || C_size <= 0 || !D || !K || !T || block_size <= 0)
+  if(!C || C_size == 0 || !D || !K || !T || block_size == 0)
     return;
 
   /*
@@ -268,7 +268,7 @@ static void threefish_encrypt(char *E,
 			      const size_t P_size,
 			      const size_t block_size)
 {
-  if(!E || !K || !T || !P || P_size <= 0 || block_size <= 0)
+  if(!E || !K || !T || !P || P_size == 0 || block_size == 0)
     return;
 
   /*
@@ -362,7 +362,7 @@ static void wordsToBytes(char *B,
 			 const uint64_t *words,
 			 const size_t words_size)
 {
-  if(!B || !words || words_size <= 0)
+  if(!B || !words || words_size == 0)
     return;
 
   for(size_t i = 0; i < words_size; i++)
@@ -385,7 +385,7 @@ void libskein_threefish_decrypt(char *D,
 				const size_t C_size,
 				const size_t block_size)
 {
-  if(!C || C_size <= 0 || !D || !K || !T || block_size <= 0)
+  if(!C || C_size == 0 || !D || !K || !T || block_size == 0)
     return;
 
   if(block_size == 256)
@@ -419,7 +419,7 @@ void libskein_threefish_encrypt(char *E,
 				const size_t P_size,
 				const size_t block_size)
 {
-  if(!E || !K || !P || P_size <= 0 || !T || block_size <= 0)
+  if(!E || !K || !P || P_size == 0 || !T || block_size == 0)
     return;
 
   if(block_size == 256)
