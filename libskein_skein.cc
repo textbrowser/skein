@@ -174,7 +174,7 @@ static void threefish_decrypt(char *D,
   ** The inverse of section 3.3.
   */
 
-  uint64_t C240 = 0x1bd11bdaa9fc1a22;
+  static const uint64_t C240 = 0x1bd11bdaa9fc1a22;
   uint64_t *k = new uint64_t[Nw + 1];
   uint64_t kNw = C240; // Section 3.3.2.
   uint64_t **s = new uint64_t*[Nr / 4 + 1];
@@ -275,7 +275,7 @@ static void threefish_encrypt(char *E,
   ** Section 3.3.
   */
 
-  uint64_t C240 = 0x1bd11bdaa9fc1a22;
+  static const uint64_t C240 = 0x1bd11bdaa9fc1a22;
   uint64_t *k = new uint64_t[Nw + 1];
   uint64_t kNw = C240; // Section 3.3.2.
   uint64_t **s = new uint64_t*[Nr / 4 + 1];
