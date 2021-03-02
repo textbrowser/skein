@@ -3,13 +3,13 @@ extern "C"
 #include <stdio.h>
 }
 
-#include "libskein_skein.h"
+#include "skein.h"
 
 static void test1(void)
 {
   char D[32];
   char E[32];
-  char K[32] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  char K[32] = {0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   char P[32] = {'H', 'e', 'l', 'l', 'o', '.', 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -17,7 +17,7 @@ static void test1(void)
   size_t i = 0;
 
   memset(E, 0, sizeof(E));
-  libskein_threefish_encrypt(E, K, T, P, sizeof(P), 256);
+  skein_threefish_encrypt(E, K, T, P, sizeof(P), 256);
   printf("Test #1, 256-bit Threefish Encryption: ");
 
   for(i = 0; i < sizeof(E) / sizeof(E[0]); i++)
@@ -26,7 +26,7 @@ static void test1(void)
   printf(".\n");
   printf("Test #1, 256-bit Threefish Decryption: ");
   memset(D, 0, sizeof(D));
-  libskein_threefish_decrypt(D, K, T, E, sizeof(E), 256);
+  skein_threefish_decrypt(D, K, T, E, sizeof(E), 256);
 
   for(i = 0; i < sizeof(D) / sizeof(D[0]); i++)
     printf("%c", D[i]);
@@ -38,7 +38,7 @@ static void test2(void)
 {
   char D[64];
   char E[64];
-  char K[64] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  char K[64] = {0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -50,7 +50,7 @@ static void test2(void)
   size_t i = 0;
 
   memset(E, 0, sizeof(E));
-  libskein_threefish_encrypt(E, K, T, P, sizeof(P), 512);
+  skein_threefish_encrypt(E, K, T, P, sizeof(P), 512);
   printf("Test #2, 512-bit Threefish Encryption: ");
 
   for(i = 0; i < sizeof(E) / sizeof(E[0]); i++)
@@ -59,7 +59,7 @@ static void test2(void)
   printf(".\n");
   printf("Test #2, 512-bit Threefish Decryption: ");
   memset(D, 0, sizeof(D));
-  libskein_threefish_decrypt(D, K, T, E, sizeof(E), 512);
+  skein_threefish_decrypt(D, K, T, E, sizeof(E), 512);
 
   for(i = 0; i < sizeof(D) / sizeof(D[0]); i++)
     printf("%c", D[i]);

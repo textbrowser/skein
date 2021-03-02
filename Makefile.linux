@@ -1,22 +1,23 @@
-CXXFLAGS = -fPIC -Wall -Wconversion -Werror -Wextra \
-	   -Wformat=2 -Wno-unused-function -Wpointer-arith \
-	   -Wshadow -Wsign-conversion -Wstrict-overflow=5
+CXXFLAGS = -fPIC \
+	   -Wall \
+	   -Wconversion \
+	   -Werror \
+	   -Wextra \
+	   -Wformat=2 \
+	   -Wno-unused-function \
+	   -Wpointer-arith \
+	   -Wshadow \
+	   -Wsign-conversion \
+	   -Wstrict-overflow=5
 
 CXX = g++
-OBJECT_FILES = libskein_skein.o
 
-all:	library $(OBJECT_FILES)
-	$(CXX) $(CXXFLAGS) test.cc -o test -L. -lskein -Wl,-rpath,.
-
-libskein_threefish.o: libskein_skein.cc libskein_skein.h
-	$(CXX) $(CXXFLAGS) -c -o libskein_skein.o libskein_skein.cc
+all:
+	$(CXX) $(CXXFLAGS) test.cc -o test
 
 clean:
-	rm -f *.o libskein.so
+	rm -f *.o
 	rm -f test
-
-library: $(OBJECT_FILES)
-	$(CXX) -shared -Wl,-soname,libskein.so -o libskein.so $?
 
 purge:
 	rm -f *~*
