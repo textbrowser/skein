@@ -25,8 +25,8 @@
 ** LIBSKEIN, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef LIBSKEIN_SKEIN_H
-#define LIBSKEIN_SKEIN_H
+#ifndef SKEIN_H
+#define SKEIN_H
 
 extern "C"
 {
