@@ -21,7 +21,7 @@ static void test1(void)
   printf("Test #1, 256-bit Threefish Encryption: ");
 
   for(i = 0; i < sizeof(E) / sizeof(E[0]); i++)
-    printf("%02x", E[i] & 0xff);
+    printf("%02x", static_cast<unsigned int> (E[i] & 0xff));
 
   printf(".\n");
   printf("Test #1, 256-bit Threefish Decryption: ");
@@ -54,7 +54,7 @@ static void test2(void)
   printf("Test #2, 512-bit Threefish Encryption: ");
 
   for(i = 0; i < sizeof(E) / sizeof(E[0]); i++)
-    printf("%02x", E[i] & 0xff);
+    printf("%02x", static_cast<unsigned int> (E[i] & 0xff));
 
   printf(".\n");
   printf("Test #2, 512-bit Threefish Decryption: ");

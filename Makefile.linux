@@ -1,13 +1,22 @@
 CXXFLAGS = -fPIC \
 	   -Wall \
+	   -Walloca \
+	   -Warray-bounds=2 \
 	   -Wconversion \
 	   -Werror \
 	   -Wextra \
 	   -Wformat=2 \
+	   -Wformat-overflow=2 \
+	   -Wformat-truncation=2 \
+	   -Wformat-security \
 	   -Wno-unused-function \
+	   -Wpedantic \
 	   -Wpointer-arith \
+	   -Wnull-dereference \
 	   -Wshadow \
 	   -Wsign-conversion \
+	   -Wstack-protector \
+	   -Wtrampolines \
 	   -Wstrict-overflow=5
 
 CXX = g++

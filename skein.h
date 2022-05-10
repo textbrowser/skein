@@ -160,11 +160,11 @@ extern "C"
     uint64_t r = 0;
 
     if(block_size == 256)
-      r = R_4[d % 8][i];
+      r = static_cast<uint64_t> (R_4[d % 8][i]);
     else if(block_size == 512)
-      r = R_8[d % 8][i];
+      r = static_cast<uint64_t> (R_8[d % 8][i]);
     else
-      r = R_16[d % 8][i];
+      r = static_cast<uint64_t> (R_16[d % 8][i]);
 
     *y0 = x0 + x1;
 
@@ -193,11 +193,11 @@ extern "C"
     uint64_t r = 0;
 
     if(block_size == 256)
-      r = R_4[d % 8][i];
+      r = static_cast<uint64_t> (R_4[d % 8][i]);
     else if(block_size == 512)
-      r = R_8[d % 8][i];
+      r = static_cast<uint64_t> (R_8[d % 8][i]);
     else
-      r = R_16[d % 8][i];
+      r = static_cast<uint64_t> (R_16[d % 8][i]);
 
     /*
     ** Please see https://en.wikipedia.org/wiki/Circular_shift.
@@ -267,7 +267,7 @@ extern "C"
 	uint64_t *f = new uint64_t[Nw];
 
 	for(size_t i = 0; i < Nw; i++)
-	  f[i] = v[RPi[i]];
+	  f[i] = v[static_cast<size_t> (RPi[i])];
 
 	for(size_t i = 0; i < Nw / 2; i++)
 	  {
@@ -380,7 +380,7 @@ extern "C"
 	  }
 
 	for(size_t i = 0; i < Nw; i++)
-	  v[i] = f[Pi[i]];
+	  v[i] = f[static_cast<size_t> (Pi[i])];
 
 	memset(f, 0, sizeof(*f) * static_cast<size_t> (Nw));
 	delete []f;
