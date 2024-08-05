@@ -221,12 +221,12 @@ extern "C"
     ** The inverse of section 3.3.
     */
 
+    auto k = new uint64_t[Nw + 1];
+    auto s = new uint64_t*[Nr / 4 + 1];
+    auto v = new uint64_t[Nw];
     static const uint64_t C240 = 0x1bd11bdaa9fc1a22;
-    uint64_t *k = new uint64_t[Nw + 1];
     uint64_t kNw = C240; // Section 3.3.2.
-    uint64_t **s = new uint64_t*[Nr / 4 + 1];
     uint64_t t[3];
-    uint64_t *v = new uint64_t[Nw];
 
     bytesToWords(k, K, C_size);
     bytesToWords(t, T, 16);
@@ -264,17 +264,17 @@ extern "C"
 
     for(size_t d = Nr - 1;; d--)
       {
-	uint64_t *f = new uint64_t[Nw];
+	auto f = new uint64_t[Nw];
 
 	for(size_t i = 0; i < Nw; i++)
 	  f[i] = v[static_cast<size_t> (RPi[i])];
 
 	for(size_t i = 0; i < Nw / 2; i++)
 	  {
+	    auto const y0 = f[i * 2];
+	    auto const y1 = f[i * 2 + 1];
 	    uint64_t x0 = 0;
 	    uint64_t x1 = 0;
-	    uint64_t y0 = f[i * 2];
-	    uint64_t y1 = f[i * 2 + 1];
 
 	    mix_inverse(y0, y1, d, i, &x0, &x1, block_size);
 	    v[i * 2] = x0;
@@ -322,12 +322,12 @@ extern "C"
     ** Section 3.3.
     */
 
+    auto k = new uint64_t[Nw + 1];
+    auto s = new uint64_t*[Nr / 4 + 1];
+    auto v = new uint64_t[Nw];
     static const uint64_t C240 = 0x1bd11bdaa9fc1a22;
-    uint64_t *k = new uint64_t[Nw + 1];
     uint64_t kNw = C240; // Section 3.3.2.
-    uint64_t **s = new uint64_t*[Nr / 4 + 1];
     uint64_t t[3];
-    uint64_t *v = new uint64_t[Nw];
 
     for(size_t i = 0; i < Nr / 4 + 1; i++)
       s[i] = new uint64_t[Nw];
@@ -365,12 +365,12 @@ extern "C"
 	  for(size_t i = 0; i < Nw; i++)
 	    v[i] += s[d / 4][i];
 
-	uint64_t *f = new uint64_t[Nw];
+	auto f = new uint64_t[Nw];
 
 	for(size_t i = 0; i < Nw / 2; i++)
 	  {
-	    uint64_t x0 = v[i * 2];
-	    uint64_t x1 = v[i * 2 + 1];
+	    auto const x0 = v[i * 2];
+	    auto const x1 = v[i * 2 + 1];
 	    uint64_t y0 = 0;
 	    uint64_t y1 = 0;
 
