@@ -1,6 +1,7 @@
 CXXFLAGS = -fPIC \
 	   -Wall \
 	   -Walloca \
+	   -Warith-conversion \
 	   -Warray-bounds=2 \
 	   -Wconversion \
 	   -Werror \
@@ -10,6 +11,7 @@ CXXFLAGS = -fPIC \
 	   -Wformat-truncation=2 \
 	   -Wformat-security \
 	   -Wno-unused-function \
+	   -Wold-style-cast \
 	   -Wpedantic \
 	   -Wpointer-arith \
 	   -Wnull-dereference \
