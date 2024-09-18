@@ -1,7 +1,7 @@
 UNAME := $(shell uname)
 
 ifeq ($(UNAME), Darwin)
-	MAKEFILE=Makefile.osx
+	MAKEFILE=Makefile.macos
 else ifeq ($(UNAME), FreeBSD)
 	MAKEFILE=Makefile.freebsd
 else ifeq ($(UNAME), Linux)
