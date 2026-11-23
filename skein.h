@@ -53,6 +53,7 @@ extern "C"
    const char *T, // Must be 16 bytes.
    const char *C, // The ciphertext.
    const size_t C_size, // The size of the ciphertext.
+   const size_t K_size,
    const size_t block_size); /*
 			     ** The block size in
 			     ** bits. Must be 256,
@@ -67,6 +68,7 @@ extern "C"
    const char *K, // Must be 32, 64, or 128 bytes.
    const char *T, // Must be 16 bytes.
    const char *P, // The plaintext.
+   const size_t K_size,
    const size_t P_size, // The size of the plaintext.
    const size_t block_size); /*
 			     ** The block size in
@@ -212,9 +214,18 @@ extern "C"
 				const char *T,
 				const char *C,
 				const size_t C_size,
+				const size_t K_size,
 				const size_t block_size)
   {
-    if(!C || !D || !K || !T || C_size == 0 || block_size == 0)
+    if(!C ||
+       !D ||
+       !K ||
+       !T ||
+       C_size != block_size / 8 ||
+       K_size != block_size / 8)
+      return;
+
+    if(block_size != 256 && block_size != 512 && block_size != 1024)
       return;
 
     /*
@@ -312,10 +323,19 @@ extern "C"
 				const char *K,
 				const char *T,
 				const char *P,
+				const size_t K_size,
 				const size_t P_size,
 				const size_t block_size)
   {
-    if(!E || !K || !P || !T || P_size != block_size / 8 || block_size == 0)
+    if(!E ||
+       !K ||
+       !P ||
+       !T ||
+       K_size != block_size / 8 ||
+       P_size != block_size / 8)
+      return;
+
+    if(block_size != 256 && block_size != 512 && block_size != 1024)
       return;
 
     /*
@@ -430,9 +450,15 @@ extern "C"
 			       const char *T,
 			       const char *C,
 			       const size_t C_size,
+			       const size_t K_size,
 			       const size_t block_size)
   {
-    if(!C || !D || !K || !T || C_size == 0 || block_size == 0)
+    if(!C ||
+       !D ||
+       !K ||
+       !T ||
+       C_size != block_size / 8 ||
+       K_size != block_size / 8)
       return;
 
     if(block_size == 256)
@@ -456,17 +482,24 @@ extern "C"
     else
       return;
 
-    threefish_decrypt(D, K, T, C, C_size, block_size);
+    threefish_decrypt(D, K, T, C, C_size, K_size, block_size);
   }
 
   void skein_threefish_encrypt(char *E,
 			       const char *K,
 			       const char *T,
 			       const char *P,
+			       const size_t K_size,
 			       const size_t P_size,
 			       const size_t block_size)
   {
-    if(!E || !K || !P || !T || P_size != block_size / 8 || block_size == 0)
+    if(!E ||
+       !K ||
+       !P ||
+       !T ||
+       K_size != block_size / 8 ||
+       P_size != block_size / 8 ||
+       block_size == 0)
       return;
 
     if(block_size == 256)
@@ -490,7 +523,7 @@ extern "C"
     else
       return;
 
-    threefish_encrypt(E, K, T, P, P_size, block_size);
+    threefish_encrypt(E, K, T, P, K_size, P_size, block_size);
   }
 #ifdef __cplusplus
 }
