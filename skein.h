@@ -214,7 +214,7 @@ extern "C"
 				const size_t C_size,
 				const size_t block_size)
   {
-    if(!C || C_size == 0 || !D || !K || !T || block_size == 0)
+    if(!C || !D || !K || !T || C_size == 0 || block_size == 0)
       return;
 
     /*
@@ -315,7 +315,7 @@ extern "C"
 				const size_t P_size,
 				const size_t block_size)
   {
-    if(!E || !K || !T || !P || P_size == 0 || block_size == 0)
+    if(!E || !K || !P || !T || P_size != block_size / 8 || block_size == 0)
       return;
 
     /*
@@ -432,7 +432,7 @@ extern "C"
 			       const size_t C_size,
 			       const size_t block_size)
   {
-    if(!C || C_size == 0 || !D || !K || !T || block_size == 0)
+    if(!C || !D || !K || !T || C_size == 0 || block_size == 0)
       return;
 
     if(block_size == 256)
@@ -466,7 +466,7 @@ extern "C"
 			       const size_t P_size,
 			       const size_t block_size)
   {
-    if(!E || !K || !P || P_size == 0 || !T || block_size == 0)
+    if(!E || !K || !P || !T || P_size != block_size / 8 || block_size == 0)
       return;
 
     if(block_size == 256)
