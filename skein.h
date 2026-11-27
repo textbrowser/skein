@@ -76,8 +76,8 @@ extern "C"
 			     ** 512, or 1024.
 			     */
 
-  static const uint8_t *Pi = 0;
-  static const uint8_t *RPi = 0;
+  static const uint8_t *Pi = nullptr;
+  static const uint8_t *RPi = nullptr;
   static const uint8_t Pi_4[4] = {0, 3, 2, 1};
   static const uint8_t Pi_8[8] = {2, 1, 4, 7, 6, 5, 0, 3};
   static const uint8_t Pi_16[16] = {0, 9, 2, 13, 6, 11, 4, 15,
